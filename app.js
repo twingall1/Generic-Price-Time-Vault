@@ -184,7 +184,7 @@ async function refreshGlobalPrice() {
       : "PulseX V1 pool";
     
     // write source label first, price comes after
-    globalPriceDiv.innerHTML = `Source: <b>${sourceLabel}</b><br>`;
+
 
     const pair = new ethersLib.Contract(cfg.pair, pairAbi, provider);
     const [r0, r1] = await pair.getReserves();
@@ -216,7 +216,11 @@ async function refreshGlobalPrice() {
     const priceBN = quoteRes.mul(ethersLib.constants.WeiPerEther).div(lockRes);
     const float = Number(ethersLib.utils.formatUnits(priceBN, 18));
 
-    globalPriceDiv.textContent = `1 ${cfg.label} ≈ ${float.toFixed(6)} DAI`;
+    globalPriceDiv.innerHTML = `
+      Source: <b>${sourceLabel}</b><br>
+      1 ${cfg.label} ≈ ${float.toFixed(6)} DAI
+    `;
+
     globalPriceRaw.textContent = `raw 1e18: ${priceBN.toString()}`;
 
   } catch (err) {
