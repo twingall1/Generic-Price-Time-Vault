@@ -1,7 +1,7 @@
 // ================================
-// app.js (Patched Version)
+// app.js (FINAL CLEAN VERSION — PART 1)
 // ================================
-console.log("Generic vault app.js loaded (patched).");
+console.log("Generic vault app.js loaded (final cleaned version).");
 
 if (!window.ethers) {
   alert("Ethers failed to load.");
@@ -12,20 +12,24 @@ const ethersLib = window.ethers;
 // -------------------------------
 // CONFIG
 // -------------------------------
-const FACTORY_ADDRESS = "0xD243c80BD1d29FEf078c7199bdA48750F5510B61".toLowerCase();
+const FACTORY_ADDRESS = "0xD243c80BD1d29FEf078c7199bdA48750F5510B61".toLowerCase();   // replace with your actual V4 factory address
 
+// Known tokens & PulseX pairs
 const ADDR = {
   DAI:  "0xefD766cCb38EaF1dfd701853BFCe31359239F305".toLowerCase(),
   WPLS: "0xA1077a294dDE1B09bB078844df40758a5D0f9a27".toLowerCase(),
   PDAI: "0x6B175474E89094C44Da98b954EedeAC495271d0F".toLowerCase(),
   HEX:  "0x2b591e99afe9f32eaa6214f7b7629768c40eeb39".toLowerCase(),
 
-  PLS_DAI_PAIR:  "0xE56043671df55dE5CDf8459710433C10324DE0aE".toLowerCase(),
-  PDAI_DAI_PAIR: "0x1D2be6eFf95Ac5C380a8D6a6143b6a97dd9D8712".toLowerCase(),
-  HEX_DAI_PAIR:  "0x6F1747370B1CAcb911ad6D4477b718633DB328c8".toLowerCase()
+  // Correct PulseX pairs:
+  PLS_DAI_PAIR:  "0x146E1f1e060e5b5016Db0D118D2C5a11A240ae32".toLowerCase(),  // WPLS/DAI (V2)
+  PDAI_DAI_PAIR: "0xfC64556FAA683e6087F425819C7Ca3C558e13aC1".toLowerCase(),  // pDAI/DAI (V2)
+  HEX_DAI_PAIR:  "0x6F1747370B1CAcb911ad6D4477b718633DB328c8".toLowerCase()   // HEX/DAI (V1)
 };
 
+// -------------------------------
 // Asset registry
+// -------------------------------
 const ASSETS = {
   PLS: {
     key: ethersLib.utils.keccak256(ethersLib.utils.toUtf8Bytes("PLS")),
@@ -68,15 +72,18 @@ const vaultAbi = [
   "function pair() view returns (address)",
   "function isNative() view returns (bool)",
   "function lockTokenIsToken0() view returns (bool)",
+
   "function priceThreshold() view returns (uint256)",
   "function unlockTime() view returns (uint256)",
   "function startTime() view returns (uint256)",
   "function withdrawn() view returns (bool)",
+
   "function currentPrice1e18() view returns (uint256)",
   "function priceConditionMet() view returns (bool)",
   "function timeConditionMet() view returns (bool)",
   "function canWithdraw() view returns (bool)",
   "function secondsUntilTimeUnlock() view returns (uint256)",
+
   "function withdraw() external"
 ];
 
@@ -123,7 +130,6 @@ const manualAddStatus  = document.getElementById("manualAddStatus");
 
 const locksContainer   = document.getElementById("locksContainer");
 
-
 // -------------------------------
 // CONNECT
 // -------------------------------
@@ -160,9 +166,8 @@ async function connect() {
 }
 connectBtn.addEventListener("click", connect);
 
-
 // -------------------------------
-// GLOBAL PRICE FEED (PATCHED HEX ORIENTATION)
+// GLOBAL PRICE FEED
 // -------------------------------
 async function refreshGlobalPrice() {
   try {
@@ -171,6 +176,15 @@ async function refreshGlobalPrice() {
     if (!cfg) return;
 
     pairAddressSpan.textContent = cfg.pair;
+
+    // Source (PulseX V1 / V2)
+    let sourceLabel =
+      (cfg.pair === ADDR.PLS_DAI_PAIR || cfg.pair === ADDR.PDAI_DAI_PAIR)
+      ? "PulseX V2 pool"
+      : "PulseX V1 pool";
+    
+    // write source label first, price comes after
+    globalPriceDiv.innerHTML = `Source: <b>${sourceLabel}</b><br>`;
 
     const pair = new ethersLib.Contract(cfg.pair, pairAbi, provider);
     const [r0, r1] = await pair.getReserves();
@@ -186,48 +200,21 @@ async function refreshGlobalPrice() {
 
     let lockRes, quoteRes;
 
-    // NORMAL ORIENTATION
     if (token0 === cfg.lockToken && token1 === cfg.quoteToken) {
       lockRes = r0;
       quoteRes = r1;
-    } else if (token0 === cfg.quoteToken && token1 === cfg.lockToken) {
+    } else if (token1 === cfg.lockToken && token0 === cfg.quoteToken) {
       lockRes = r1;
       quoteRes = r0;
-    }
-
-    // FIXED OVERRIDE FOR HEX: ensure HEX is ALWAYS lock token
-    else if (cfg.label === "HEX") {
-      if (token0 === ADDR.HEX && token1 === ADDR.DAI) {
-        lockRes = r0; 
-        quoteRes = r1;
-      } else if (token0 === ADDR.DAI && token1 === ADDR.HEX) {
-        lockRes = r1;
-        quoteRes = r0;
-      } else {
-        globalPriceDiv.textContent = "HEX Pair mismatch.";
-        return;
-      }
-    }
-
-    else {
+    } else {
       globalPriceDiv.textContent = "Pair tokens mismatch.";
+      globalPriceRaw.textContent = "";
       return;
     }
 
-    // Determine decimals for lockToken (HEX = 8, everything else = 18)
-    let lockDecimals = 18;
-    if (cfg.label === "HEX") {
-      lockDecimals = 8;
-    }
-    
-    // Calculate price scaled to 1e18
-    // price1e18 = quoteRes * 10^(18 + lockDecimals - quoteDecimals) / lockRes
-    // DAI has 18 decimals → quoteDecimals = 18 → simplifies to 10^(lockDecimals)
-    const scale = ethersLib.BigNumber.from(10).pow(lockDecimals);
-    
+    // EXACT PRICE LOGIC MATCHING VAULT SOL:
     const priceBN = quoteRes.mul(ethersLib.constants.WeiPerEther).div(lockRes);
     const float = Number(ethersLib.utils.formatUnits(priceBN, 18));
-
 
     globalPriceDiv.textContent = `1 ${cfg.label} ≈ ${float.toFixed(6)} DAI`;
     globalPriceRaw.textContent = `raw 1e18: ${priceBN.toString()}`;
@@ -238,27 +225,36 @@ async function refreshGlobalPrice() {
     console.error("Global price error:", err);
   }
 }
+
 setInterval(refreshGlobalPrice, 15000);
 assetSelect.addEventListener("change", refreshGlobalPrice);
 
+// PART 1 END
+
+// ================================
+// app.js (FINAL CLEAN VERSION — PART 2)
+// ================================
 
 // -------------------------------
-// LOCAL STORAGE
+// LOCAL STORAGE HELPERS
 // -------------------------------
 function localKey() {
   return "generic-vaults-" + (userAddress || "anon");
 }
+
 function getLocalVaults() {
   if (!userAddress) return [];
   const raw = localStorage.getItem(localKey());
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (Array.isArray(parsed)) return parsed;
+    return [];
   } catch {
     return [];
   }
 }
+
 function saveLocalVaultAddress(addr) {
   const list = getLocalVaults();
   const lower = addr.toLowerCase();
@@ -268,13 +264,15 @@ function saveLocalVaultAddress(addr) {
   }
 }
 
-
 // -------------------------------
 // CREATE VAULT
 // -------------------------------
 createForm.addEventListener("submit", async (e) => {
   e.preventDefault();
-  if (!signer) return alert("Connect wallet first.");
+  if (!signer) {
+    alert("Connect wallet first.");
+    return;
+  }
 
   try {
     createBtn.disabled = true;
@@ -282,12 +280,16 @@ createForm.addEventListener("submit", async (e) => {
 
     const assetCode = assetSelect.value;
     const cfg = ASSETS[assetCode];
+    if (!cfg) throw new Error("Unknown asset");
 
     const priceStr = targetPriceInput.value.trim();
+    if (!priceStr) throw new Error("Enter a target price");
+
     const th1e18 = ethersLib.utils.parseUnits(priceStr, 18);
 
     const dt = unlockDateInput.value.trim();
     const ts = Date.parse(dt);
+    if (isNaN(ts)) throw new Error("Invalid datetime");
     const unlockTime = Math.floor(ts / 1000);
 
     const tx = await factoryContract.createVault(cfg.key, th1e18, unlockTime);
@@ -301,25 +303,28 @@ createForm.addEventListener("submit", async (e) => {
           vaultAddr = parsed.args.vault;
           break;
         }
-      } catch {}
+      } catch {
+        // ignore non-matching logs
+      }
     }
 
-    if (vaultAddr) {
-      saveLocalVaultAddress(vaultAddr.toLowerCase());
-      createStatus.textContent = `Vault created: ${vaultAddr}`;
-      await loadLocalVaults();
+    if (!vaultAddr) {
+      createStatus.textContent = "Vault created but address not parsed.";
+      console.warn("No VaultCreated event found in tx logs?");
     } else {
-      createStatus.textContent = "Vault created but event not parsed.";
+      const lower = vaultAddr.toLowerCase();
+      saveLocalVaultAddress(lower);
+      createStatus.textContent = `Vault created: ${lower}`;
+      await loadLocalVaults();
     }
 
   } catch (err) {
-    createStatus.textContent = "Error: " + err.message;
+    createStatus.textContent = "Error: " + (err && err.message ? err.message : String(err));
     console.error(err);
   } finally {
     createBtn.disabled = false;
   }
 });
-
 
 // -------------------------------
 // LOAD LOCAL VAULTS
@@ -332,14 +337,12 @@ async function loadLocalVaults() {
     return;
   }
 
-  locksContainer.textContent = "Loading...";
-
+  locksContainer.textContent = "Loading vaults...";
   const results = [];
 
   for (const addr of list) {
     try {
       const vault = new ethersLib.Contract(addr, vaultAbi, provider);
-
       const [
         owner,
         lockToken,
@@ -362,20 +365,32 @@ async function loadLocalVaults() {
         vault.withdrawn()
       ]);
 
+      const assetLabel = detectAssetLabel(lockToken.toLowerCase(), isNative);
+
+      // Locked balance
       let balanceBN;
-      if (isNative) balanceBN = await provider.getBalance(addr);
-      else {
+      if (isNative) {
+        balanceBN = await provider.getBalance(addr);
+      } else {
         const erc20 = new ethersLib.Contract(lockToken, erc20Abi, provider);
         balanceBN = await erc20.balanceOf(addr);
       }
 
+      // Try reading current price but don't fail entire load if it reverts
       let currentPriceBN = ethersLib.constants.Zero;
-      try { currentPriceBN = await vault.currentPrice1e18(); } catch {}
+      try {
+        currentPriceBN = await vault.currentPrice1e18();
+      } catch {
+        // no liquidity or error; keep as zero
+      }
 
+      // canWithdraw (safe path)
       let canWithdraw = false;
-      try { canWithdraw = await vault.canWithdraw(); } catch {}
-
-      const assetLabel = detectAssetLabel(lockToken.toLowerCase(), isNative);
+      try {
+        canWithdraw = await vault.canWithdraw();
+      } catch {
+        canWithdraw = false;
+      }
 
       results.push({
         address: addr.toLowerCase(),
@@ -395,6 +410,7 @@ async function loadLocalVaults() {
 
     } catch (err) {
       console.error("Vault load error:", addr, err);
+      // Keep a removable error card
       results.push({
         address: addr.toLowerCase(),
         error: true
@@ -406,6 +422,7 @@ async function loadLocalVaults() {
   renderLocks();
 }
 
+// Detect asset label from lockToken + isNative
 function detectAssetLabel(lockTokenAddr, isNative) {
   if (isNative) return "PLS";
   if (lockTokenAddr === ADDR.PDAI) return "pDAI";
@@ -413,9 +430,8 @@ function detectAssetLabel(lockTokenAddr, isNative) {
   return "Unknown";
 }
 
-
 // -------------------------------
-// RENDER VAULTS (PATCHED ERROR CARD REMOVAL)
+// RENDER LOCK CARDS
 // -------------------------------
 function renderLocks() {
   if (!locks.length) {
@@ -427,7 +443,7 @@ function renderLocks() {
 
   locksContainer.innerHTML = locks.map(lock => {
 
-    // ========== ERROR CARD (NOW REMOVABLE) ==========
+    // Error card (removable)
     if (lock.error) {
       return `
         <div class="card vault-card">
@@ -441,7 +457,6 @@ function renderLocks() {
       `;
     }
 
-    // Normal vault rendering continues unchanged ↓↓↓
     const assetLabel = lock.assetLabel;
 
     const thresholdFloat = parseFloat(
@@ -462,8 +477,8 @@ function renderLocks() {
     // Price goal percentage
     let priceGoalPct = 0;
     if (lock.threshold.gt(0) && lock.currentPriceBN.gt(0)) {
-      const pctBN = lock.currentPriceBN.mul(10000).div(lock.threshold);
-      priceGoalPct = pctBN.toNumber() / 100;
+      const pctBN = lock.currentPriceBN.mul(10000).div(lock.threshold); // basis points
+      priceGoalPct = pctBN.toNumber() / 100; // 2 decimals
     }
     if (priceGoalPct > 100) priceGoalPct = 100;
     if (priceGoalPct < 0)   priceGoalPct = 0;
@@ -583,7 +598,6 @@ function renderLocks() {
   }).join("");
 }
 
-
 // -------------------------------
 // WITHDRAW
 // -------------------------------
@@ -603,9 +617,8 @@ async function withdrawVault(addr) {
   }
 }
 
-
 // -------------------------------
-// REMOVE VAULT
+// REMOVE VAULT FROM LOCAL LIST
 // -------------------------------
 function removeVault(addr) {
   const lower = addr.toLowerCase();
@@ -613,7 +626,6 @@ function removeVault(addr) {
   localStorage.setItem(localKey(), JSON.stringify(list));
   loadLocalVaults();
 }
-
 
 // -------------------------------
 // COPY ADDRESS
@@ -623,7 +635,6 @@ function copyAddr(addr) {
     console.error("Copy failed:", err);
   });
 }
-
 
 // -------------------------------
 // MANUAL ADD
@@ -645,7 +656,6 @@ addVaultBtn.addEventListener("click", async () => {
   await loadLocalVaults();
 });
 
-
 // -------------------------------
 // UTILITIES
 // -------------------------------
@@ -653,6 +663,7 @@ function formatTimestamp(ts) {
   return new Date(ts * 1000).toLocaleString();
 }
 
+// A number-based version of countdown, for timeGoal label
 function formatCountdownNumber(diff) {
   if (diff <= 0) return "0s";
 
@@ -670,4 +681,5 @@ function formatCountdownNumber(diff) {
   if (!d && !h && !m) parts.push(s + "s");
   return parts.join(" ");
 }
+
 
