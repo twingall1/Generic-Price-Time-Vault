@@ -12,7 +12,7 @@ const ethersLib = window.ethers;
 // -------------------------------
 // CONFIG
 // -------------------------------
-const FACTORY_ADDRESS = "0x58A1d5D1F2960f6d307D35a9a1910689AB681ad4".toLowerCase();
+const FACTORY_ADDRESS = "0xD243c80BD1d29FEf078c7199bdA48750F5510B61".toLowerCase();
 
 const ADDR = {
   DAI:  "0xefD766cCb38EaF1dfd701853BFCe31359239F305".toLowerCase(),
@@ -225,9 +225,7 @@ async function refreshGlobalPrice() {
     // DAI has 18 decimals → quoteDecimals = 18 → simplifies to 10^(lockDecimals)
     const scale = ethersLib.BigNumber.from(10).pow(lockDecimals);
     
-    const priceBN = quoteRes.mul(scale).mul(ethersLib.constants.WeiPerEther).div(lockRes);
-    
-    // Convert to float for display
+    const priceBN = quoteRes.mul(ethersLib.constants.WeiPerEther).div(lockRes);
     const float = Number(ethersLib.utils.formatUnits(priceBN, 18));
 
 
