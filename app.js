@@ -12,7 +12,7 @@ const ethersLib = window.ethers;
 // -------------------------------
 // CONFIG
 // -------------------------------
-const FACTORY_ADDRESS = "0xD243c80BD1d29FEf078c7199bdA48750F5510B61".toLowerCase(); // <--- PUT V4/Vx FACTORY HERE
+const FACTORY_ADDRESS = "0xdc8fADCe03BEa4c0BD005E34e5CE7F614FD78375".toLowerCase(); // <--- PUT V4/Vx FACTORY HERE
 
 // Known tokens & PulseX pairs
 const ADDR = {
