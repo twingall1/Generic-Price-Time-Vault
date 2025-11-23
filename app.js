@@ -1,7 +1,22 @@
 // ================================
-// app.js (V8 dual-feed, USD-normalized, correct decimals)
+// app.js — Generic Vault V9 (USD-native prices)
 // ================================
-console.log("Generic vault app.js loaded (V8 dual-feed USD).");
+//
+// V9 vs old V8:
+//  - Contract now stores priceThreshold and prices in true USD × 1e18.
+//  - priceDetail() prices are USD, not raw AMM ratios.
+//  - UI can treat threshold and chosenPrice as simple 18-decimal USD values.
+//  - Pie chart now uses (currentUSD / targetUSD) × 100 — correct and stable.
+//  - Global feed panel still uses AMM reserves + decimals to compute USD,
+//    matching the V9 contract logic.
+//
+// IMPORTANT:
+//  - This app.js assumes you're using VaultFactoryV9 and GenericPriceTimeVaultV9.
+//  - Old V8 vaults may display inconsistent "price unlocked" status;
+//    new serious locks should be created via the V9 factory only.
+//
+
+console.log("Generic vault app.js loaded (V9 USD-native).");
 
 if (!window.ethers) {
   alert("Ethers failed to load.");
@@ -12,7 +27,8 @@ const ethersLib = window.ethers;
 // -------------------------------
 // CONFIG
 // -------------------------------
-const FACTORY_ADDRESS = "0xe6563bbe3ecbf8759183b5d77b92db9966821847".toLowerCase();
+// TODO: replace this with your deployed V9 factory address:
+const FACTORY_ADDRESS = "0x933C13b913BDAe8b8BCd063a2F2b5226733316d5".toLowerCase();
 
 // Known tokens & PulseX pairs
 const ADDR = {
@@ -20,7 +36,7 @@ const ADDR = {
   WPLS: "0xA1077a294dDE1B09bB078844df40758a5D0f9a27".toLowerCase(),
   PDAI: "0x6B175474E89094C44Da98b954EedeAC495271d0F".toLowerCase(),
   HEX:  "0x2b591e99afe9f32eaa6214f7b7629768c40eeb39".toLowerCase(),
-  USDC: "0x15d38573d2feeb82e7ad5187ab8c1d52810b1f07".toLowerCase(), // special USDC
+  USDC: "0x15d38573d2feeb82e7ad5187ab8c1d52810b1f07".toLowerCase(), // special USDC variant
 
   // Primary pairs
   PLS_DAI_V2_PAIR:  "0x146E1f1e060e5b5016Db0D118D2C5a11A240ae32".toLowerCase(), // WPLS/DAI V2
@@ -34,7 +50,7 @@ const ADDR = {
 };
 
 // -------------------------------
-// Asset registry with decimals
+// Asset registry with decimals (MUST MATCH FACTORY CONFIG)
 // -------------------------------
 const ASSETS = {
   PLS: {
@@ -93,7 +109,7 @@ const ASSETS = {
   }
 };
 
-// For older bits of code: "pair" refers to primary pair.
+// For any older code that references ASSETS[code].pair
 Object.keys(ASSETS).forEach(code => {
   ASSETS[code].pair = ASSETS[code].primaryPair;
 });
@@ -102,10 +118,12 @@ Object.keys(ASSETS).forEach(code => {
 // ABIs
 // -------------------------------
 const factoryAbi = [
-  "event VaultCreated(address indexed owner, address vault, bytes32 assetKey, uint256 priceThreshold1e18, uint256 unlockTime)",
-  "function createVault(bytes32 assetKey, uint256 priceThreshold1e18, uint256 unlockTime) external returns (address)"
+  "event VaultCreated(address indexed owner, address vault, bytes32 assetKey, uint256 priceThresholdUsd1e18, uint256 unlockTime)",
+  "function createVault(bytes32 assetKey, uint256 priceThresholdUsd1e18, uint256 unlockTime) external returns (address)"
 ];
 
+// NOTE: Same functions as V8, but in V9:
+//  - price fields are USD 1e18 now.
 const vaultAbi = [
   "function owner() view returns (address)",
   "function lockToken() view returns (address)",
@@ -209,8 +227,10 @@ async function connect() {
 connectBtn.addEventListener("click", connect);
 
 // -------------------------------
-// PRICE HELPERS (correct decimals → USD)
+// PRICE HELPERS (AMM → USD)
 // -------------------------------
+
+// For AMM side, we still compute a USD float using the same logic the contract uses.
 function computeDisplayDecimals(lockDecimals, quoteDecimals) {
   // priceBN = quoteRes * 1e18 / lockRes
   // realPrice = quoteRes * 10^lockDec / (lockRes * 10^quoteDec)
@@ -224,6 +244,7 @@ function priceBNToUsdFloat(priceBN, lockDecimals, quoteDecimals) {
 }
 
 function quoteResToUsdFloat(quoteResBN, quoteDecimals) {
+  // DAI: 18, USDC: 6 — both ~1 USD, just different precision.
   return Number(ethersLib.utils.formatUnits(quoteResBN, quoteDecimals));
 }
 
@@ -260,7 +281,7 @@ async function refreshGlobalPrice() {
       );
     }
 
-    // Decide which feed V8 vaults use: higher USD-normalized reserves, tie-break by price
+    // Decide which feed V9 uses: higher USD-side reserves (normalized), tie-break by price
     let chosenSource = "none";
     let chosenPriceFloat = null;
 
@@ -278,6 +299,7 @@ async function refreshGlobalPrice() {
         chosenSource = "backup";
         chosenPriceFloat = backupInfo.priceFloat;
       } else {
+        // equal USD liquidity → higher price
         if (primaryInfo.priceFloat >= backupInfo.priceFloat) {
           chosenSource = "primary";
           chosenPriceFloat = primaryInfo.priceFloat;
@@ -286,6 +308,9 @@ async function refreshGlobalPrice() {
           chosenPriceFloat = backupInfo.priceFloat;
         }
       }
+    } else {
+      chosenSource = "none";
+      chosenPriceFloat = null;
     }
 
     // Build UI text
@@ -313,9 +338,9 @@ async function refreshGlobalPrice() {
 
     html += `<div class="small" style="margin-top:8px;">`;
     if (chosenSource === "primary") {
-      html += `Effective price (used by new V8 vaults): <b>$${chosenPriceFloat.toFixed(6)}</b> via <b>primary feed</b> (higher USD-side reserves or equal reserves & higher price).`;
+      html += `Effective price (V9 logic): <b>$${chosenPriceFloat.toFixed(6)}</b> via <b>primary feed</b> (higher USD-side reserves or equal reserves & higher price).`;
     } else if (chosenSource === "backup") {
-      html += `Effective price (used by new V8 vaults): <b>$${chosenPriceFloat.toFixed(6)}</b> via <b>backup feed</b> (higher USD-side reserves or equal reserves & higher price).`;
+      html += `Effective price (V9 logic): <b>$${chosenPriceFloat.toFixed(6)}</b> via <b>backup feed</b> (higher USD-side reserves or equal reserves & higher price).`;
     } else {
       html += `No valid price feeds at this moment – only time unlock will work.`;
     }
@@ -349,7 +374,7 @@ async function refreshGlobalPrice() {
 setInterval(refreshGlobalPrice, 15000);
 assetSelect.addEventListener("change", refreshGlobalPrice);
 
-// Compute price + liquidity for a pair
+// Compute price + liquidity for a pair (AMM-side, used only for global display)
 async function computePairPriceAndLiquidity(pairAddr, lockToken, lockDecimals, quoteToken, quoteDecimals) {
   if (!pairAddr) return { ok: false };
 
@@ -372,6 +397,7 @@ async function computePairPriceAndLiquidity(pairAddr, lockToken, lockDecimals, q
       lockRes  = r1;
       quoteRes = r0;
     } else {
+      // Pair tokens mismatch for this asset
       return { ok: false };
     }
 
@@ -407,7 +433,8 @@ function getLocalVaults() {
   if (!raw) return [];
   try {
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    if (Array.isArray(parsed)) return parsed;
+    return [];
   } catch {
     return [];
   }
@@ -441,8 +468,9 @@ createForm.addEventListener("submit", async (e) => {
     if (!cfg) throw new Error("Unknown asset");
 
     const priceStr = targetPriceInput.value.trim();
-    if (!priceStr) throw new Error("Enter a target price");
+    if (!priceStr) throw new Error("Enter a target price (USD per 1 token)");
 
+    // V9: threshold is explicit USD × 1e18
     const th1e18 = ethersLib.utils.parseUnits(priceStr, 18);
 
     const dt = unlockDateInput.value.trim();
@@ -461,7 +489,9 @@ createForm.addEventListener("submit", async (e) => {
           vaultAddr = parsed.args.vault;
           break;
         }
-      } catch {}
+      } catch {
+        // ignore non-matching logs
+      }
     }
 
     if (!vaultAddr) {
@@ -483,7 +513,7 @@ createForm.addEventListener("submit", async (e) => {
 });
 
 // -------------------------------
-// LOAD LOCAL VAULTS (V8)
+// LOAD LOCAL VAULTS (V9-compatible)
 // -------------------------------
 async function loadLocalVaults() {
   const list = getLocalVaults();
@@ -542,6 +572,7 @@ async function loadLocalVaults() {
       const primaryQuoteDecimals   = cfgByLabel ? cfgByLabel.primaryQuoteDecimals   : 18;
       const backupQuoteDecimals    = cfgByLabel ? cfgByLabel.backupQuoteDecimals    : 18;
 
+      // Locked balance
       let balanceBN;
       if (isNative) {
         balanceBN = await provider.getBalance(addr);
@@ -550,6 +581,7 @@ async function loadLocalVaults() {
         balanceBN = await erc20.balanceOf(addr);
       }
 
+      // priceDetail() from vault
       let chosenPriceBN = ethersLib.constants.Zero;
       let primaryValid = false;
       let primaryPriceBN = ethersLib.constants.Zero;
@@ -563,6 +595,7 @@ async function loadLocalVaults() {
 
       try {
         const detail = await vault.priceDetail();
+        // V9: these are USD × 1e18 now
         chosenPriceBN     = detail[0];
         primaryValid      = detail[1];
         primaryPriceBN    = detail[2];
@@ -670,15 +703,13 @@ function renderLocks() {
 
     const assetLabel = lock.assetLabel;
 
+    // V9: threshold and chosenPriceBN are USD × 1e18
     const thresholdFloat = parseFloat(
       ethersLib.utils.formatUnits(lock.threshold, 18)
     );
 
-    let chosenQuoteDecimals = lock.primaryQuoteDecimals;
-    if (lock.usedBackup) chosenQuoteDecimals = lock.backupQuoteDecimals;
-
     const currentPriceFloat = (lock.priceValid && lock.chosenPriceBN.gt(0))
-      ? priceBNToUsdFloat(lock.chosenPriceBN, lock.lockDecimals, chosenQuoteDecimals)
+      ? parseFloat(ethersLib.utils.formatUnits(lock.chosenPriceBN, 18))
       : 0;
 
     const balanceDisplayDecimals = (assetLabel === "HEX") ? 8 : 18;
@@ -689,17 +720,18 @@ function renderLocks() {
     const withdrawnTag = lock.withdrawn;
     const canWithdraw = lock.canWithdraw && !lock.withdrawn;
 
+    // Price goal percentage (USD-based)
     let priceGoalPct = 0;
-    if (lock.threshold.gt(0) && lock.chosenPriceBN.gt(0)) {
-      const pctBN = lock.chosenPriceBN.mul(10000).div(lock.threshold);
-      priceGoalPct = pctBN.toNumber() / 100;
+    if (thresholdFloat > 0 && currentPriceFloat > 0) {
+      priceGoalPct = (currentPriceFloat / thresholdFloat) * 100;
     }
     if (priceGoalPct > 100) priceGoalPct = 100;
     if (priceGoalPct < 0)   priceGoalPct = 0;
-    if (canWithdraw && lock.chosenPriceBN.gte(lock.threshold)) {
+    if (canWithdraw && currentPriceFloat >= thresholdFloat) {
       priceGoalPct = 100;
     }
 
+    // Time goal percentage
     let timeGoalPct = 0;
     let timeLabel = "";
     if (lock.startTime && lock.unlockTime && lock.unlockTime > lock.startTime) {
@@ -722,6 +754,7 @@ function renderLocks() {
 
     const timeBarStyle = `width:${timeGoalPct.toFixed(1)}%;`;
 
+    // Feed status text (also USD-based in V9)
     let feedText = "";
     if (!lock.priceValid) {
       feedText = `<span class="status-bad">No valid price feeds – time unlock only.</span>`;
@@ -730,11 +763,11 @@ function renderLocks() {
       const backupStatus  = lock.backupValid  ? "ok" : "unavailable";
 
       const primaryPriceFloat = lock.primaryValid
-        ? priceBNToUsdFloat(lock.primaryPriceBN, lock.lockDecimals, lock.primaryQuoteDecimals)
+        ? parseFloat(ethersLib.utils.formatUnits(lock.primaryPriceBN, 18))
         : 0;
 
       const backupPriceFloat = lock.backupValid
-        ? priceBNToUsdFloat(lock.backupPriceBN, lock.lockDecimals, lock.backupQuoteDecimals)
+        ? parseFloat(ethersLib.utils.formatUnits(lock.backupPriceBN, 18))
         : 0;
 
       const primaryQuoteResFloat = lock.primaryQuoteResBN.gt(0)
@@ -758,9 +791,9 @@ function renderLocks() {
       feedText += `</div>`;
 
       if (lock.usedPrimary) {
-        feedText += `<div class="small">Effective price (for this vault now): <b>$${currentPriceFloat.toFixed(6)}</b> via <b>PRIMARY</b> feed (higher USD-side reserves or equal reserves & higher price).</div>`;
+        feedText += `<div class="small">Effective price (for this vault now): <b>$${currentPriceFloat.toFixed(6)}</b> via <b>PRIMARY</b> feed (V9 USD-native).</div>`;
       } else if (lock.usedBackup) {
-        feedText += `<div class="small">Effective price (for this vault now): <b>$${currentPriceFloat.toFixed(6)}</b> via <b>BACKUP</b> feed (higher USD-side reserves or equal reserves & higher price).</div>`;
+        feedText += `<div class="small">Effective price (for this vault now): <b>$${currentPriceFloat.toFixed(6)}</b> via <b>BACKUP</b> feed (V9 USD-native).</div>`;
       } else {
         feedText += `<div class="small">Effective price (for this vault now): <b>$${currentPriceFloat.toFixed(6)}</b>.</div>`;
       }
@@ -770,6 +803,7 @@ function renderLocks() {
       <div class="card vault-card ${canWithdraw ? 'vault-unlockable' : ''}">
         <div class="vault-asset-label">${assetLabel} VAULT</div>
 
+        <!-- Address + copy -->
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;width:100%;max-width:450px;">
           <input class="mono"
             value="${lock.address}"
@@ -794,6 +828,7 @@ function renderLocks() {
 
         ${status}
 
+        <!-- Metrics & Price + Time Goals -->
         <div style="
           display:flex;
           flex-direction:row;
@@ -805,6 +840,7 @@ function renderLocks() {
           max-width:100%;
         ">
 
+          <!-- LEFT: Metrics -->
           <div style="display:flex;flex-direction:column;flex:0 1 auto;">
             <div><strong>Target:</strong> 1 ${assetLabel} ≥ $${thresholdFloat.toFixed(6)}</div>
             <div><strong>Current:</strong> $${currentPriceFloat.toFixed(6)}</div>
@@ -813,6 +849,7 @@ function renderLocks() {
             <div style="margin-top:4px;">${feedText}</div>
           </div>
 
+          <!-- MIDDLE: Price goal pie -->
           <div class="price-goal-wrapper" style="flex:0 0 auto;margin-left:8px;">
             <div class="small" style="text-align:center;">Price goal</div>
             <div style="display:flex;align-items:center;gap:6px;">
@@ -823,6 +860,7 @@ function renderLocks() {
             </div>
           </div>
 
+          <!-- RIGHT: Time goal bar -->
           <div class="time-progress-wrapper" style="flex:0 0 auto;margin-left:8px;max-width:160px;">
             <div class="small">Time goal</div>
             <div class="time-progress-bar-bg">
@@ -833,6 +871,7 @@ function renderLocks() {
 
         </div>
 
+        <!-- Withdraw / Remove -->
         <div style="margin-top:10px;">
           <button onclick="withdrawVault('${lock.address}')"
             ${(!canWithdraw) ? "disabled" : ""}>
