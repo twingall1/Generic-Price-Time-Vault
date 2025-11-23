@@ -274,22 +274,27 @@ async function refreshGlobalPrice() {
       chosenSource = "backup";
       chosenPriceFloat = backupInfo.priceFloat;
     } else if (primaryInfo.ok && backupInfo.ok) {
-      if (primaryInfo.quoteResBN.gt(backupInfo.quoteResBN)) {
-        chosenSource = "primary";
-        chosenPriceFloat = primaryInfo.priceFloat;
-      } else if (backupInfo.quoteResBN.gt(primaryInfo.quoteResBN)) {
-        chosenSource = "backup";
-        chosenPriceFloat = backupInfo.priceFloat;
-      } else {
-        // equal reserves → higher price
-        if (primaryInfo.priceBN.gte(backupInfo.priceBN)) {
+
+      
+      if (primaryInfo.quoteResFloat > backupInfo.quoteResFloat) {
           chosenSource = "primary";
           chosenPriceFloat = primaryInfo.priceFloat;
-        } else {
+      } else if (backupInfo.quoteResFloat > primaryInfo.quoteResFloat) {
           chosenSource = "backup";
           chosenPriceFloat = backupInfo.priceFloat;
-        }
+      } else {
+          // equal USD liquidity → tie-break by price
+          if (primaryInfo.priceFloat >= backupInfo.priceFloat) {
+              chosenSource = "primary";
+              chosenPriceFloat = primaryInfo.priceFloat;
+          } else {
+              chosenSource = "backup";
+              chosenPriceFloat = backupInfo.priceFloat;
+          }
       }
+
+
+      
     } else {
       chosenSource = "none";
       chosenPriceFloat = null;
