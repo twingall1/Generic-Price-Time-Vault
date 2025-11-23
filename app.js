@@ -1,7 +1,7 @@
 // ================================
-// app.js (V6 dual-feed aware)
+// app.js (V6 dual-feed, USD-normalized, correct decimals)
 // ================================
-console.log("Generic vault app.js loaded (V6 dual-feed).");
+console.log("Generic vault app.js loaded (V6 dual-feed USD).");
 
 if (!window.ethers) {
   alert("Ethers failed to load.");
@@ -12,7 +12,7 @@ const ethersLib = window.ethers;
 // -------------------------------
 // CONFIG
 // -------------------------------
-const FACTORY_ADDRESS = "0xd79967dE02F1582a2e4DFd1B575821462779bDe7".toLowerCase(); // <-- PUT V6 FACTORY HERE
+const FACTORY_ADDRESS = "0xd79967dE02F1582a2e4DFd1B575821462779bDe7".toLowerCase(); // <-- PUT YOUR V6 FACTORY HERE
 
 // Known tokens & PulseX pairs
 const ADDR = {
@@ -20,7 +20,7 @@ const ADDR = {
   WPLS: "0xA1077a294dDE1B09bB078844df40758a5D0f9a27".toLowerCase(),
   PDAI: "0x6B175474E89094C44Da98b954EedeAC495271d0F".toLowerCase(),
   HEX:  "0x2b591e99afe9f32eaa6214f7b7629768c40eeb39".toLowerCase(),
-  USDC: "0x15D38573d2feeb82e7ad5187aB8c1D5281018f07".toLowerCase(),
+  USDC: "0x15D38573d2feeb82e7ad5187aB8c1D5281018f07".toLowerCase(), // your “USD Coin from Ethereum”
 
   // Primary pairs
   PLS_DAI_V2_PAIR:  "0x146E1f1e060e5b5016Db0D118D2C5a11A240ae32".toLowerCase(), // WPLS/DAI V2
@@ -34,20 +34,24 @@ const ADDR = {
 };
 
 // -------------------------------
-// Asset registry (primary + backup feeds)
+// Asset registry with decimals
 // -------------------------------
 const ASSETS = {
   PLS: {
     key: ethersLib.utils.keccak256(ethersLib.utils.toUtf8Bytes("PLS")),
     label: "PLS",
     isNative: true,
+
     lockToken: ADDR.WPLS,
+    lockDecimals: 18,
 
     primaryQuote: ADDR.DAI,
+    primaryQuoteDecimals: 18,
     primaryPair: ADDR.PLS_DAI_V2_PAIR,
     primaryFeedLabel: "PulseX V2 WPLS/DAI",
 
     backupQuote: ADDR.USDC,
+    backupQuoteDecimals: 6,
     backupPair: ADDR.USDC_WPLS_V1_PAIR,
     backupFeedLabel: "PulseX V1 USDC/PLS"
   },
@@ -55,13 +59,17 @@ const ASSETS = {
     key: ethersLib.utils.keccak256(ethersLib.utils.toUtf8Bytes("PDAI")),
     label: "pDAI",
     isNative: false,
+
     lockToken: ADDR.PDAI,
+    lockDecimals: 18,
 
     primaryQuote: ADDR.DAI,
+    primaryQuoteDecimals: 18,
     primaryPair: ADDR.PDAI_DAI_V2_PAIR,
     primaryFeedLabel: "PulseX V2 pDAI/DAI",
 
     backupQuote: ADDR.DAI,
+    backupQuoteDecimals: 18,
     backupPair: ADDR.PDAI_DAI_V1_PAIR,
     backupFeedLabel: "PulseX V1 pDAI/DAI"
   },
@@ -69,19 +77,23 @@ const ASSETS = {
     key: ethersLib.utils.keccak256(ethersLib.utils.toUtf8Bytes("HEX")),
     label: "HEX",
     isNative: false,
+
     lockToken: ADDR.HEX,
+    lockDecimals: 8,
 
     primaryQuote: ADDR.DAI,
+    primaryQuoteDecimals: 18,
     primaryPair: ADDR.HEX_DAI_V1_PAIR,
     primaryFeedLabel: "PulseX V1 HEX/DAI",
 
     backupQuote: ADDR.USDC,
+    backupQuoteDecimals: 6,
     backupPair: ADDR.USDC_HEX_V2_PAIR,
     backupFeedLabel: "PulseX V2 USDC/HEX"
   }
 };
 
-// For backwards compatibility: "pair" still refers to primary.
+// For some older pieces of code: "pair" refers to primary pair.
 Object.keys(ASSETS).forEach(code => {
   ASSETS[code].pair = ASSETS[code].primaryPair;
 });
@@ -113,6 +125,7 @@ const vaultAbi = [
   "function canWithdraw() view returns (bool)",
   "function secondsUntilTimeUnlock() view returns (uint256)",
 
+  // V6 priceDetail:
   "function priceDetail() view returns (uint256,bool,uint256,uint256,bool,uint256,uint256,bool,bool,bool)",
 
   "function withdraw() external"
@@ -198,7 +211,27 @@ async function connect() {
 connectBtn.addEventListener("click", connect);
 
 // -------------------------------
-// GLOBAL PRICE FEED (dual-feed aware)
+// PRICE HELPERS (correct decimals → USD)
+// -------------------------------
+function computeDisplayDecimals(lockDecimals, quoteDecimals) {
+  // priceBN = quoteRes * 1e18 / lockRes
+  // realPrice = quoteRes * 10^lockDec / (lockRes * 10^quoteDec)
+  // so realPrice = priceBN / (10^(18 + quoteDec - lockDec))
+  return 18 + quoteDecimals - lockDecimals;
+}
+
+function priceBNToUsdFloat(priceBN, lockDecimals, quoteDecimals) {
+  const displayDecimals = computeDisplayDecimals(lockDecimals, quoteDecimals);
+  return Number(ethersLib.utils.formatUnits(priceBN, displayDecimals));
+}
+
+function quoteResToUsdFloat(quoteResBN, quoteDecimals) {
+  // DAI: 18, USDC: 6 — both are ~1 USD, just different precision.
+  return Number(ethersLib.utils.formatUnits(quoteResBN, quoteDecimals));
+}
+
+// -------------------------------
+// GLOBAL PRICE FEED (dual feeds, USD-normalized)
 // -------------------------------
 async function refreshGlobalPrice() {
   try {
@@ -209,13 +242,14 @@ async function refreshGlobalPrice() {
     const primaryPairAddr = cfg.primaryPair;
     const backupPairAddr  = cfg.backupPair;
 
-    // Show primary pair address by default
     pairAddressSpan.textContent = primaryPairAddr;
 
     const primaryInfo = await computePairPriceAndLiquidity(
       primaryPairAddr,
       cfg.lockToken,
-      cfg.primaryQuote
+      cfg.lockDecimals,
+      cfg.primaryQuote,
+      cfg.primaryQuoteDecimals
     );
 
     let backupInfo = { ok: false };
@@ -223,39 +257,42 @@ async function refreshGlobalPrice() {
       backupInfo = await computePairPriceAndLiquidity(
         backupPairAddr,
         cfg.lockToken,
-        cfg.backupQuote
+        cfg.lockDecimals,
+        cfg.backupQuote,
+        cfg.backupQuoteDecimals
       );
     }
 
-    // Decide which feed vaults will use: higher quoteRes, tie-break by price
+    // Decide which feed vaults use (same as V6): higher USD reserves, tie-break by price
     let chosenSource = "none";
-    let chosenPrice = null;
+    let chosenPriceFloat = null;
 
     if (primaryInfo.ok && !backupInfo.ok) {
       chosenSource = "primary";
-      chosenPrice = primaryInfo.priceFloat;
+      chosenPriceFloat = primaryInfo.priceFloat;
     } else if (!primaryInfo.ok && backupInfo.ok) {
       chosenSource = "backup";
-      chosenPrice = backupInfo.priceFloat;
+      chosenPriceFloat = backupInfo.priceFloat;
     } else if (primaryInfo.ok && backupInfo.ok) {
-      if (primaryInfo.quoteRes.gt(backupInfo.quoteRes)) {
+      if (primaryInfo.quoteResBN.gt(backupInfo.quoteResBN)) {
         chosenSource = "primary";
-        chosenPrice = primaryInfo.priceFloat;
-      } else if (backupInfo.quoteRes.gt(primaryInfo.quoteRes)) {
+        chosenPriceFloat = primaryInfo.priceFloat;
+      } else if (backupInfo.quoteResBN.gt(primaryInfo.quoteResBN)) {
         chosenSource = "backup";
-        chosenPrice = backupInfo.priceFloat;
+        chosenPriceFloat = backupInfo.priceFloat;
       } else {
-        // equal liquidity – use higher price
-        chosenSource = (primaryInfo.priceBN.gte(backupInfo.priceBN))
-          ? "primary"
-          : "backup";
-        chosenPrice = (chosenSource === "primary")
-          ? primaryInfo.priceFloat
-          : backupInfo.priceFloat;
+        // equal reserves → higher price
+        if (primaryInfo.priceBN.gte(backupInfo.priceBN)) {
+          chosenSource = "primary";
+          chosenPriceFloat = primaryInfo.priceFloat;
+        } else {
+          chosenSource = "backup";
+          chosenPriceFloat = backupInfo.priceFloat;
+        }
       }
     } else {
       chosenSource = "none";
-      chosenPrice = null;
+      chosenPriceFloat = null;
     }
 
     // Build UI text
@@ -266,8 +303,8 @@ async function refreshGlobalPrice() {
       html += `Status: <span class="status-bad">unavailable</span>`;
     } else {
       html += `Status: <span class="status-ok">ok</span><br>`;
-      html += `Price: 1 ${cfg.label} ≈ ${primaryInfo.priceFloat.toFixed(6)} DAI<br>`;
-      html += `Quote reserves: ${primaryInfo.quoteResHuman.toFixed(2)} (USD side)</div>`;
+      html += `Price: 1 ${cfg.label} ≈ $${primaryInfo.priceFloat.toFixed(6)}<br>`;
+      html += `Quote reserves: ${primaryInfo.quoteResFloat.toFixed(2)} USD side</div>`;
     }
 
     if (backupPairAddr) {
@@ -276,17 +313,16 @@ async function refreshGlobalPrice() {
         html += `Status: <span class="status-bad">unavailable</span>`;
       } else {
         html += `Status: <span class="status-ok">ok</span><br>`;
-        html += `Price: 1 ${cfg.label} ≈ ${backupInfo.priceFloat.toFixed(6)} DAI<br>`;
-        html += `Quote reserves: ${backupInfo.quoteResHuman.toFixed(2)} (USD side)</div>`;
+        html += `Price: 1 ${cfg.label} ≈ $${backupInfo.priceFloat.toFixed(6)}<br>`;
+        html += `Quote reserves: ${backupInfo.quoteResFloat.toFixed(2)} USD side</div>`;
       }
     }
 
     html += `<div class="small" style="margin-top:8px;">`;
-
     if (chosenSource === "primary") {
-      html += `Effective price (used by vaults now): <b>${chosenPrice.toFixed(6)} DAI</b> via <b>primary feed</b> (higher USD-side reserves).`;
+      html += `Effective price (used by vaults now): <b>$${chosenPriceFloat.toFixed(6)}</b> via <b>primary feed</b> (higher USD-side reserves or equal reserves & higher price).`;
     } else if (chosenSource === "backup") {
-      html += `Effective price (used by vaults now): <b>${chosenPrice.toFixed(6)} DAI</b> via <b>backup feed</b> (higher USD-side reserves).`;
+      html += `Effective price (used by vaults now): <b>$${chosenPriceFloat.toFixed(6)}</b> via <b>backup feed</b> (higher USD-side reserves or equal reserves & higher price).`;
     } else {
       html += `No valid price feeds at this moment – only time unlock will work.`;
     }
@@ -320,8 +356,8 @@ async function refreshGlobalPrice() {
 setInterval(refreshGlobalPrice, 15000);
 assetSelect.addEventListener("change", refreshGlobalPrice);
 
-// Helper: compute price & liquidity for a pair
-async function computePairPriceAndLiquidity(pairAddr, lockToken, quoteToken) {
+// Compute price + liquidity for a pair
+async function computePairPriceAndLiquidity(pairAddr, lockToken, lockDecimals, quoteToken, quoteDecimals) {
   if (!pairAddr) return { ok: false };
 
   try {
@@ -337,10 +373,10 @@ async function computePairPriceAndLiquidity(pairAddr, lockToken, quoteToken) {
     let lockRes, quoteRes;
 
     if (token0 === lockToken && token1 === quoteToken) {
-      lockRes = r0;
+      lockRes  = r0;
       quoteRes = r1;
     } else if (token1 === lockToken && token0 === quoteToken) {
-      lockRes = r1;
+      lockRes  = r1;
       quoteRes = r0;
     } else {
       // Pair tokens mismatch for this asset
@@ -350,27 +386,15 @@ async function computePairPriceAndLiquidity(pairAddr, lockToken, quoteToken) {
     if (lockRes.eq(0)) return { ok: false };
 
     const priceBN = quoteRes.mul(ethersLib.constants.WeiPerEther).div(lockRes);
-
-    // NOTE: for display we treat quoteToken as "USD-ish" → 18 or 6 decimals.
-    // We'll normalize to "DAI-equivalent" float with 18 decimals.
-    // USDC has 6 decimals, but we conceptually treat 1 USDC = 1 DAI.
-    // For UI: we just convert 1e18 to float the same way as vault.
-    let displayDecimals = 18;
-    // HEX special-case: lock has 8 decimals, but we store 1e18 price; we already
-    // fixed that in card display. For global we just use 18 as 1e18 representation.
-    const priceFloat = Number(ethersLib.utils.formatUnits(priceBN, displayDecimals));
-
-    // Quote reserves human (USD side) – we don't need exact decimals, just relative size.
-    // Assume 18 if not USDC; USDC is 6.
-    let quoteDec = (quoteToken === ADDR.USDC) ? 6 : 18;
-    const quoteResHuman = Number(ethersLib.utils.formatUnits(quoteRes, quoteDec));
+    const priceFloat = priceBNToUsdFloat(priceBN, lockDecimals, quoteDecimals);
+    const quoteResFloat = quoteResToUsdFloat(quoteRes, quoteDecimals);
 
     return {
       ok: true,
       priceBN,
       priceFloat,
-      quoteRes,
-      quoteResHuman
+      quoteResBN: quoteRes,
+      quoteResFloat
     };
   } catch (err) {
     console.error("Pair price error for", pairAddr, err);
@@ -379,7 +403,7 @@ async function computePairPriceAndLiquidity(pairAddr, lockToken, quoteToken) {
 }
 
 // -------------------------------
-// LOCAL STORAGE HELPERS
+// LOCAL STORAGE
 // -------------------------------
 function localKey() {
   return "generic-vaults-" + (userAddress || "anon");
@@ -428,6 +452,7 @@ createForm.addEventListener("submit", async (e) => {
     const priceStr = targetPriceInput.value.trim();
     if (!priceStr) throw new Error("Enter a target price");
 
+    // Threshold semantics unchanged: user inputs "USD per token" as 18-decimal number.
     const th1e18 = ethersLib.utils.parseUnits(priceStr, 18);
 
     const dt = unlockDateInput.value.trim();
@@ -508,7 +533,18 @@ async function loadLocalVaults() {
         vault.withdrawn()
       ]);
 
-      const assetLabel = detectAssetLabel(lockToken.toLowerCase(), isNative);
+      const lockTokenLower = lockToken.toLowerCase();
+      const assetLabel = detectAssetLabel(lockTokenLower, isNative);
+
+      // Determine decimals/quote tokens for this asset
+      let cfgByLabel = null;
+      if (assetLabel === "PLS") cfgByLabel = ASSETS.PLS;
+      else if (assetLabel === "pDAI") cfgByLabel = ASSETS.PDAI;
+      else if (assetLabel === "HEX") cfgByLabel = ASSETS.HEX;
+
+      const lockDecimals = cfgByLabel ? cfgByLabel.lockDecimals : 18;
+      const primaryQuoteDecimals = cfgByLabel ? cfgByLabel.primaryQuoteDecimals : 18;
+      const backupQuoteDecimals  = cfgByLabel ? cfgByLabel.backupQuoteDecimals  : 18;
 
       // Locked balance
       let balanceBN;
@@ -519,33 +555,32 @@ async function loadLocalVaults() {
         balanceBN = await erc20.balanceOf(addr);
       }
 
-      // Detailed price info (V6 priceDetail). If it fails, fall back to legacy currentPrice1e18.
+      // priceDetail() from V6
       let chosenPriceBN = ethersLib.constants.Zero;
       let primaryValid = false;
       let primaryPriceBN = ethersLib.constants.Zero;
-      let primaryQuoteRes = ethersLib.constants.Zero;
+      let primaryQuoteResBN = ethersLib.constants.Zero;
       let backupValid = false;
       let backupPriceBN = ethersLib.constants.Zero;
-      let backupQuoteRes = ethersLib.constants.Zero;
+      let backupQuoteResBN = ethersLib.constants.Zero;
       let usedPrimary = false;
       let usedBackup = false;
       let priceValid = false;
 
       try {
         const detail = await vault.priceDetail();
-        // detail is array-like: [chosenPrice, pValid, pPrice, pRes, bValid, bPrice, bRes, usedPrim, usedBack, valid]
         chosenPriceBN   = detail[0];
         primaryValid    = detail[1];
         primaryPriceBN  = detail[2];
-        primaryQuoteRes = detail[3];
+        primaryQuoteResBN = detail[3];
         backupValid     = detail[4];
         backupPriceBN   = detail[5];
-        backupQuoteRes  = detail[6];
+        backupQuoteResBN = detail[6];
         usedPrimary     = detail[7];
         usedBackup      = detail[8];
         priceValid      = detail[9];
       } catch {
-        // priceDetail not available (old vault) → we do a best-effort fallback
+        // Fallback if priceDetail not present (legacy vaults)
         try {
           chosenPriceBN = await vault.currentPrice1e18();
           priceValid = true;
@@ -565,7 +600,7 @@ async function loadLocalVaults() {
       results.push({
         address: addr.toLowerCase(),
         assetLabel,
-        lockToken: lockToken.toLowerCase(),
+        lockToken: lockTokenLower,
         quoteToken: quoteToken.toLowerCase(),
         pair: pairAddr.toLowerCase(),
         isNative,
@@ -577,19 +612,21 @@ async function loadLocalVaults() {
         chosenPriceBN,
         primaryValid,
         primaryPriceBN,
-        primaryQuoteRes,
+        primaryQuoteResBN,
         backupValid,
         backupPriceBN,
-        backupQuoteRes,
+        backupQuoteResBN,
         usedPrimary,
         usedBackup,
         priceValid,
+        lockDecimals,
+        primaryQuoteDecimals,
+        backupQuoteDecimals,
         canWithdraw
       });
 
     } catch (err) {
       console.error("Vault load error:", addr, err);
-      // Keep a removable error card
       results.push({
         address: addr.toLowerCase(),
         error: true
@@ -605,7 +642,7 @@ async function loadLocalVaults() {
 function detectAssetLabel(lockTokenAddr, isNative) {
   if (isNative) return "PLS";
   if (lockTokenAddr === ADDR.PDAI) return "pDAI";
-  if (lockTokenAddr === ADDR.HEX) return "HEX";
+  if (lockTokenAddr === ADDR.HEX)  return "HEX";
   return "Unknown";
 }
 
@@ -622,7 +659,6 @@ function renderLocks() {
 
   locksContainer.innerHTML = locks.map(lock => {
 
-    // Error card (removable)
     if (lock.error) {
       return `
         <div class="card vault-card">
@@ -642,11 +678,12 @@ function renderLocks() {
       ethersLib.utils.formatUnits(lock.threshold, 18)
     );
 
-    // DISPLAY DECIMALS FOR CURRENT PRICE (match vault logic):
-    const priceDisplayDecimals = (assetLabel === "HEX") ? 28 : 18;
+    // Choose quote decimals used for chosenPriceBN
+    let chosenQuoteDecimals = lock.primaryQuoteDecimals;
+    if (lock.usedBackup) chosenQuoteDecimals = lock.backupQuoteDecimals;
 
     const currentPriceFloat = (lock.priceValid && lock.chosenPriceBN.gt(0))
-      ? parseFloat(ethersLib.utils.formatUnits(lock.chosenPriceBN, priceDisplayDecimals))
+      ? priceBNToUsdFloat(lock.chosenPriceBN, lock.lockDecimals, chosenQuoteDecimals)
       : 0;
 
     // Locked balance
@@ -658,15 +695,14 @@ function renderLocks() {
     const withdrawnTag = lock.withdrawn;
     const canWithdraw = lock.canWithdraw && !lock.withdrawn;
 
-    // Price goal percentage (uses raw chosen price vs threshold)
+    // Price goal percentage (still uses raw contract scaling)
     let priceGoalPct = 0;
     if (lock.threshold.gt(0) && lock.chosenPriceBN.gt(0)) {
-      const pctBN = lock.chosenPriceBN.mul(10000).div(lock.threshold); // basis points
-      priceGoalPct = pctBN.toNumber() / 100; // 2 decimals
+      const pctBN = lock.chosenPriceBN.mul(10000).div(lock.threshold);
+      priceGoalPct = pctBN.toNumber() / 100;
     }
     if (priceGoalPct > 100) priceGoalPct = 100;
     if (priceGoalPct < 0)   priceGoalPct = 0;
-
     if (canWithdraw && lock.chosenPriceBN.gte(lock.threshold)) {
       priceGoalPct = 100;
     }
@@ -703,38 +739,39 @@ function renderLocks() {
       const backupStatus  = lock.backupValid  ? "ok" : "unavailable";
 
       const primaryPriceFloat = lock.primaryValid
-        ? parseFloat(ethersLib.utils.formatUnits(lock.primaryPriceBN, priceDisplayDecimals))
-        : 0;
-      const backupPriceFloat = lock.backupValid
-        ? parseFloat(ethersLib.utils.formatUnits(lock.backupPriceBN, priceDisplayDecimals))
+        ? priceBNToUsdFloat(lock.primaryPriceBN, lock.lockDecimals, lock.primaryQuoteDecimals)
         : 0;
 
-      // Quote reserves human for card (best-effort)
-      const primaryQuoteResHuman = lock.primaryQuoteRes
-        ? Number(ethersLib.utils.formatUnits(lock.primaryQuoteRes, 18))
+      const backupPriceFloat = lock.backupValid
+        ? priceBNToUsdFloat(lock.backupPriceBN, lock.lockDecimals, lock.backupQuoteDecimals)
         : 0;
-      const backupQuoteResHuman = lock.backupQuoteRes
-        ? Number(ethersLib.utils.formatUnits(lock.backupQuoteRes, 18))
+
+      const primaryQuoteResFloat = lock.primaryQuoteResBN.gt(0)
+        ? quoteResToUsdFloat(lock.primaryQuoteResBN, lock.primaryQuoteDecimals)
+        : 0;
+
+      const backupQuoteResFloat = lock.backupQuoteResBN.gt(0)
+        ? quoteResToUsdFloat(lock.backupQuoteResBN, lock.backupQuoteDecimals)
         : 0;
 
       feedText += `<div class="small">Primary feed: status=${primaryStatus}`;
       if (lock.primaryValid) {
-        feedText += `, price≈${primaryPriceFloat.toFixed(6)} DAI, USD reserves≈${primaryQuoteResHuman.toFixed(2)}`;
+        feedText += `, price≈$${primaryPriceFloat.toFixed(6)}, USD reserves≈${primaryQuoteResFloat.toFixed(2)}`;
       }
       feedText += `</div>`;
 
       feedText += `<div class="small">Backup feed: status=${backupStatus}`;
       if (lock.backupValid) {
-        feedText += `, price≈${backupPriceFloat.toFixed(6)} DAI, USD reserves≈${backupQuoteResHuman.toFixed(2)}`;
+        feedText += `, price≈$${backupPriceFloat.toFixed(6)}, USD reserves≈${backupQuoteResFloat.toFixed(2)}`;
       }
       feedText += `</div>`;
 
       if (lock.usedPrimary) {
-        feedText += `<div class="small">Effective price for this vault: <b>${currentPriceFloat.toFixed(6)} DAI</b> via <b>PRIMARY</b> (higher USD reserves or price).</div>`;
+        feedText += `<div class="small">Effective price (for this vault now): <b>$${currentPriceFloat.toFixed(6)}</b> via <b>PRIMARY</b> feed (higher USD-side reserves or equal reserves & higher price).</div>`;
       } else if (lock.usedBackup) {
-        feedText += `<div class="small">Effective price for this vault: <b>${currentPriceFloat.toFixed(6)} DAI</b> via <b>BACKUP</b> (higher USD reserves or price).</div>`;
+        feedText += `<div class="small">Effective price (for this vault now): <b>$${currentPriceFloat.toFixed(6)}</b> via <b>BACKUP</b> feed (higher USD-side reserves or equal reserves & higher price).</div>`;
       } else {
-        feedText += `<div class="small">Effective price for this vault: <b>${currentPriceFloat.toFixed(6)} DAI</b>.</div>`;
+        feedText += `<div class="small">Effective price (for this vault now): <b>$${currentPriceFloat.toFixed(6)}</b>.</div>`;
       }
     }
 
@@ -781,8 +818,8 @@ function renderLocks() {
 
           <!-- LEFT: Metrics -->
           <div style="display:flex;flex-direction:column;flex:0 1 auto;">
-            <div><strong>Target:</strong> 1 ${assetLabel} ≥ ${thresholdFloat.toFixed(6)} DAI</div>
-            <div><strong>Current:</strong> ${currentPriceFloat.toFixed(6)} DAI</div>
+            <div><strong>Target:</strong> 1 ${assetLabel} ≥ $${thresholdFloat.toFixed(6)}</div>
+            <div><strong>Current:</strong> $${currentPriceFloat.toFixed(6)}</div>
             <div><strong>Backup unlock:</strong> ${formatTimestamp(lock.unlockTime)}</div>
             <div><strong>Locked:</strong> ${balanceFloat.toFixed(4)} ${assetLabel}</div>
             <div style="margin-top:4px;">${feedText}</div>
@@ -892,7 +929,6 @@ function formatTimestamp(ts) {
   return new Date(ts * 1000).toLocaleString();
 }
 
-// A number-based version of countdown, for timeGoal label
 function formatCountdownNumber(diff) {
   if (diff <= 0) return "0s";
 
