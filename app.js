@@ -12,7 +12,7 @@ const ethersLib = window.ethers;
 // -------------------------------
 // CONFIG
 // -------------------------------
-const FACTORY_ADDRESS = "0xd79967dE02F1582a2e4DFd1B575821462779bDe7".toLowerCase(); // <-- PUT YOUR V6 FACTORY HERE
+const FACTORY_ADDRESS = "0xB9f7F4ca3d93094e860216Cf07187aE62bef96d7".toLowerCase(); // <-- PUT YOUR V6 FACTORY HERE
 
 // Known tokens & PulseX pairs
 const ADDR = {
@@ -20,7 +20,7 @@ const ADDR = {
   WPLS: "0xA1077a294dDE1B09bB078844df40758a5D0f9a27".toLowerCase(),
   PDAI: "0x6B175474E89094C44Da98b954EedeAC495271d0F".toLowerCase(),
   HEX:  "0x2b591e99afe9f32eaa6214f7b7629768c40eeb39".toLowerCase(),
-  USDC: "0x15D38573d2feeb82e7ad5187aB8c1D5281018f07".toLowerCase(), // your “USD Coin from Ethereum”
+  USDC: "0x15d38573d2feeb82e7ad5187ab8c1d52810b1f07".toLowerCase(), // your “USD Coin from Ethereum”
 
   // Primary pairs
   PLS_DAI_V2_PAIR:  "0x146E1f1e060e5b5016Db0D118D2C5a11A240ae32".toLowerCase(), // WPLS/DAI V2
