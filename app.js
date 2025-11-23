@@ -497,9 +497,8 @@ createForm.addEventListener("submit", async (e) => {
     createBtn.disabled = false;
   }
 });
-
 // -------------------------------
-// LOAD LOCAL VAULTS
+// LOAD LOCAL VAULTS (V7-compatible)
 // -------------------------------
 async function loadLocalVaults() {
   const list = getLocalVaults();
@@ -515,26 +514,35 @@ async function loadLocalVaults() {
   for (const addr of list) {
     try {
       const vault = new ethersLib.Contract(addr, vaultAbi, provider);
+
       const [
         owner,
         lockToken,
-        quoteToken,
-        pairAddr,
         isNative,
         threshold,
         unlockTime,
         startTime,
-        withdrawn
+        withdrawn,
+        primaryQuoteToken,
+        backupQuoteToken,
+        primaryPair,
+        backupPair,
+        primaryLockTokenIsToken0,
+        backupLockTokenIsToken0,
       ] = await Promise.all([
         vault.owner(),
         vault.lockToken(),
-        vault.quoteToken(),
-        vault.pair(),
         vault.isNative(),
         vault.priceThreshold(),
         vault.unlockTime(),
         vault.startTime(),
-        vault.withdrawn()
+        vault.withdrawn(),
+        vault.primaryQuoteToken(),
+        vault.backupQuoteToken(),
+        vault.primaryPair(),
+        vault.backupPair(),
+        vault.primaryLockTokenIsToken0(),
+        vault.backupLockTokenIsToken0()
       ]);
 
       const lockTokenLower = lockToken.toLowerCase();
@@ -546,9 +554,9 @@ async function loadLocalVaults() {
       else if (assetLabel === "pDAI") cfgByLabel = ASSETS.PDAI;
       else if (assetLabel === "HEX") cfgByLabel = ASSETS.HEX;
 
-      const lockDecimals = cfgByLabel ? cfgByLabel.lockDecimals : 18;
-      const primaryQuoteDecimals = cfgByLabel ? cfgByLabel.primaryQuoteDecimals : 18;
-      const backupQuoteDecimals  = cfgByLabel ? cfgByLabel.backupQuoteDecimals  : 18;
+      const lockDecimals           = cfgByLabel ? cfgByLabel.lockDecimals           : 18;
+      const primaryQuoteDecimals   = cfgByLabel ? cfgByLabel.primaryQuoteDecimals   : 18;
+      const backupQuoteDecimals    = cfgByLabel ? cfgByLabel.backupQuoteDecimals    : 18;
 
       // Locked balance
       let balanceBN;
@@ -559,7 +567,7 @@ async function loadLocalVaults() {
         balanceBN = await erc20.balanceOf(addr);
       }
 
-      // priceDetail() from V6
+      // priceDetail() from V7
       let chosenPriceBN = ethersLib.constants.Zero;
       let primaryValid = false;
       let primaryPriceBN = ethersLib.constants.Zero;
@@ -573,18 +581,18 @@ async function loadLocalVaults() {
 
       try {
         const detail = await vault.priceDetail();
-        chosenPriceBN   = detail[0];
-        primaryValid    = detail[1];
-        primaryPriceBN  = detail[2];
+        chosenPriceBN     = detail[0];
+        primaryValid      = detail[1];
+        primaryPriceBN    = detail[2];
         primaryQuoteResBN = detail[3];
-        backupValid     = detail[4];
-        backupPriceBN   = detail[5];
-        backupQuoteResBN = detail[6];
-        usedPrimary     = detail[7];
-        usedBackup      = detail[8];
-        priceValid      = detail[9];
+        backupValid       = detail[4];
+        backupPriceBN     = detail[5];
+        backupQuoteResBN  = detail[6];
+        usedPrimary       = detail[7];
+        usedBackup        = detail[8];
+        priceValid        = detail[9];
       } catch {
-        // Fallback if priceDetail not present (legacy vaults)
+        // Fallback if priceDetail missing (older vaults)
         try {
           chosenPriceBN = await vault.currentPrice1e18();
           priceValid = true;
@@ -605,12 +613,17 @@ async function loadLocalVaults() {
         address: addr.toLowerCase(),
         assetLabel,
         lockToken: lockTokenLower,
-        quoteToken: quoteToken.toLowerCase(),
-        pair: pairAddr.toLowerCase(),
+        // We no longer store quoteToken/pair; keep fields for compatibility if you want:
+        primaryQuoteToken: primaryQuoteToken.toLowerCase(),
+        backupQuoteToken:  backupQuoteToken.toLowerCase(),
+        primaryPair:       primaryPair.toLowerCase(),
+        backupPair:        backupPair.toLowerCase(),
+        primaryLockTokenIsToken0,
+        backupLockTokenIsToken0,
         isNative,
         threshold,
         unlockTime: unlockTime.toNumber(),
-        startTime: startTime.toNumber(),
+        startTime:  startTime.toNumber(),
         withdrawn,
         balanceBN,
         chosenPriceBN,
@@ -641,6 +654,7 @@ async function loadLocalVaults() {
   locks = results;
   renderLocks();
 }
+
 
 // Detect asset label from lockToken + isNative
 function detectAssetLabel(lockTokenAddr, isNative) {
