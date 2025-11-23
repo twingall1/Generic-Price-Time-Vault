@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <style>
-    /* ----- DARK THEME BASICS (borrowed from pDAI site) ------ */
+    /* ----- DARK THEME BASICS ----- */
     body {
       font-family: system-ui, sans-serif;
       background: #050815;
@@ -47,9 +47,7 @@
     button:hover { background:#1fc556; }
     button[disabled] { opacity:.5; cursor:not-allowed; }
 
-    select {
-      cursor:pointer;
-    }
+    select { cursor:pointer; }
 
     .small { font-size:12px; color:#9ca3af; }
 
@@ -169,7 +167,7 @@
     <span style="font-size:30px;">⏳</span>
     <span>
       <b>Price + Time Vaults (PLS / pDAI / HEX)</b><br>
-      <span class="small">Discipline vaults with price-mediated unlock &amp; time backup</span>
+      <span class="small">Discipline vaults with price-mediated unlock &amp; time backup (V8 USD-normalized feeds)</span>
     </span>
   </h1>
 
@@ -185,11 +183,12 @@
       • This site lets you create <b>immutable vaults</b> for PLS, pDAI, or HEX.<br>
       • Your tokens are locked until the <b>market price</b> crosses your threshold,
         or a <b>backup time unlock</b> is reached.<br>
-      • Price feed uses the configured PulseX pair for the chosen asset (PLS/DAI, pDAI/DAI, HEX/DAI).<br>
+      • Price feed uses PulseX pools for the chosen asset (PLS/DAI, pDAI/DAI, HEX/DAI + USDC backups).<br>
+      • V8 vaults choose feeds by <b>USD-normalized liquidity</b> (using known decimals for DAI=18, USDC=6).<br>
       • Vault logic is enforced fully on-chain; no one (including the deployer) can change the rules.<br><br>
       • To deposit: send the chosen token (or PLS) directly to the vault address.<br>
       • To withdraw: call <b>Withdraw</b> once the price OR the backup time condition is met.<br>
-      • Time-based unlock still works even if the price pair has zero liquidity.<br>
+      • Time-based unlock still works even if price pairs are illiquid.<br>
       <div class="fee-note">
         ⚠ A <b>0.5% fee</b> is charged on successful withdrawal, paid in the locked asset
         to <span class="mono">0x0e4519e78e3c4bd16c7500e41d4605e54c7cd3b4</span>.
@@ -229,7 +228,7 @@
         <div class="small" style="margin-bottom:6px;">
           Source: PulseX <b>pools</b> for the selected asset.<br>
           Each asset uses a <b>primary feed</b> and a <b>backup feed</b>.<br>
-          If both feeds are healthy, the vaults use the one with <b>higher USD-side liquidity</b>.<br>
+          V8 vaults choose the feed with higher <b>USD-normalized</b> liquidity.<br>
           Pair address:<br>
           <span id="pairAddress" class="mono"></span>
         </div>
