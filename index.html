@@ -371,12 +371,7 @@
     .maximize-btn {
       flex: 0 0 auto;
     }
-    /* Fix for ABOUT card broken line wrapping */
-    .about-onecol {
-      white-space: normal !important;
-      line-height: 1.45;
-      word-break: normal;
-    }
+
   </style>
 </head>
 
@@ -471,17 +466,21 @@
       <div class="card">
         <h2>About This App</h2>
         <div class="small about-onecol">
-          • Create <b>immutable vaults</b> for PLS, pDAI, or HEX.<br>
-          • Tokens lock until your <b>USD price</b> target OR time unlock.<br>
-          • Feeds from PulseX pools (PLS/DAI, pDAI/DAI, HEX/USDC+DAI).<br>
-          • Contract logic lives fully on-chain (no admin keys).<br>
-          • Thresholds are <b>USD × 1e18</b> per 1 token.<br>
-          • Time unlock always works even if feeds fail.<br>
-          • Vault addresses stored only in local storage.<br>
-          <div class="fee-note">
+          <ul style="margin:0; padding-left:18px;">
+            <li>Create <b>immutable vaults</b> for PLS, pDAI, or HEX.</li>
+            <li>Tokens lock until your <b>USD price</b> target OR time unlock.</li>
+            <li>Feeds from PulseX pools (PLS/DAI, pDAI/DAI, HEX/USDC+DAI).</li>
+            <li>Contract logic lives fully on-chain (no admin keys).</li>
+            <li>Thresholds are <b>USD × 1e18</b> per 1 token.</li>
+            <li>Time unlock always works even if feeds fail.</li>
+            <li>Vault addresses stored only in local storage.</li>
+          </ul>
+        
+          <div class="fee-note" style="margin-top:6px;">
             ⚠ A 0.5% fee is charged on successful withdrawal.
           </div>
         </div>
+
       </div>
     </div>
 
