@@ -227,12 +227,14 @@
     }
   
     .vault-header-actions {
-        position: relative !important;
-        right: 780px !important;
-        margin-top: 0 !important;
-        padding-top: 0 !important;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+        position: static !important;   /* remove forced shifting */
+        margin-left: 12px;             /* sits just right of PLS VAULT */
     }
-      
+  
     /* Address bar size + ellipsis */
     .vault-header-actions input {
       flex: 0 0 auto !important;
@@ -375,8 +377,6 @@
     .vault-col-feeds {
         margin-top: 11px;   /* adjust 4–14px as needed */
     }
-
-
   </style>
 
 </head>
