@@ -227,14 +227,12 @@
     }
   
     .vault-header-actions {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      white-space: nowrap;
-      position: relative !important;
-      right: 820px !important; /* your chosen final left-shift */
-      margin-top: 0 !important;
-      padding-top: 0 !important;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+        position: static !important;   /* remove forced shifting */
+        margin-left: 12px;             /* sits just right of PLS VAULT */
     }
   
     /* Address bar size + ellipsis */
