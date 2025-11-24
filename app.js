@@ -1,16 +1,8 @@
 // ================================
-// app.js — Generic Vault V9.1 (USD-native prices)
-// ================================
-//
-// - priceThreshold is USD × 1e18 per 1 whole lock token.
-// - Vault prices & thresholds are all USD 1e18.
-// - PLS feeds use only DAI (WPLS/DAI V1 primary, V2 backup) to avoid USDC precision issues.
-// - HEX feeds use USDC/HEX (primary) + HEX/DAI (backup).
-// - pDAI feeds use DAI/DAI as before.
-// - Frontend & factory share the same hardcoded decimals & pair addresses.
+// app.js — Generic Vault V9.1 (USD-native, compact UI)
 // ================================
 
-console.log("Generic vault app.js loaded (V9.1 USD-native).");
+console.log("Generic vault app.js (V9.1, compact UI) loaded.");
 
 if (!window.ethers) {
   alert("Ethers failed to load.");
@@ -19,29 +11,21 @@ if (!window.ethers) {
 const ethersLib = window.ethers;
 
 // -------------------------------
-// Helper: 4-sig-fig-esque formatter for USD prices
-// (keeps value truthful, shows ~4 meaningful digits,
-//  preserves trailing zeros, avoids exponent notation).
+// Helper: price formatting
 // -------------------------------
 function formatLockPrice(value) {
   if (!isFinite(value) || value === 0) return "0.0000";
-  // 4 significant digits
-  let s = Number(value).toPrecision(4); // may be "1.924e-5" or "0.001900"
-
+  let s = Number(value).toPrecision(4); // e.g. "1.924e-5" or "0.001900"
   if (s.includes("e") || s.includes("E")) {
     const n = Number(s);
-    let fixed = n.toFixed(8);           // up to 8 decimals
+    let fixed = n.toFixed(8);
     fixed = fixed.replace(/0+$/, "").replace(/\.$/, "");
     return fixed;
   } else {
-    // Already plain decimal, with trailing zeros if any
     return s;
   }
 }
 
-// -------------------------------
-// Helper: reserves in "k" with 4-ish sig figs
-// -------------------------------
 function formatReserveK(value) {
   if (!isFinite(value) || value === 0) return "0.0000";
   const abs = Math.abs(value);
@@ -54,12 +38,11 @@ function formatReserveK(value) {
 }
 
 // -------------------------------
-// CONFIG
+// CONFIG (FACTORY + PAIRS)
 // -------------------------------
-// TODO: set this to your deployed V9.1 factory address:
+// TODO: set this to your deployed V9.1 factory:
 const FACTORY_ADDRESS = "0xAa64fc582874a4d1855582E0875A8ACf39f3E4CB".toLowerCase();
 
-// Known tokens & PulseX pairs
 const ADDR = {
   DAI:  "0xefD766cCb38EaF1dfd701853BFCe31359239F305".toLowerCase(),
   WPLS: "0xA1077a294dDE1B09bB078844df40758a5D0f9a27".toLowerCase(),
@@ -67,38 +50,28 @@ const ADDR = {
   HEX:  "0x2b591e99afe9f32eaa6214f7b7629768c40eeb39".toLowerCase(),
   USDC: "0x15d38573d2feeb82e7ad5187ab8c1d52810b1f07".toLowerCase(),
 
-  // PLS DAIs
-  PLS_DAI_V1_PAIR: "0xE56043671df55dE5CDf8459710433C10324DE0aE".toLowerCase(), // WPLS/DAI V1
-  PLS_DAI_V2_PAIR: "0x146E1f1e060e5b5016Db0D118D2C5a11A240ae32".toLowerCase(), // WPLS/DAI V2
+  PLS_DAI_V1_PAIR: "0xE56043671df55dE5CDf8459710433C10324DE0aE".toLowerCase(),
+  PLS_DAI_V2_PAIR: "0x146E1f1e060e5b5016Db0D118D2C5a11A240ae32".toLowerCase(),
 
-  // pDAI/DAI
   PDAI_DAI_V2_PAIR: "0xfC64556FAA683e6087F425819C7Ca3C558e13aC1".toLowerCase(),
   PDAI_DAI_V1_PAIR: "0x1D2be6eFf95Ac5C380a8D6a6143b6a97dd9D8712".toLowerCase(),
 
-  // HEX feeds
-  HEX_DAI_V1_PAIR:  "0x6F1747370B1CAcb911ad6D4477b718633DB328c8".toLowerCase(), // HEX/DAI V1
-  USDC_HEX_V2_PAIR: "0xC475332e92561CD58f278E4e2eD76c17D5b50f05".toLowerCase()  // USDC/HEX V2
+  HEX_DAI_V1_PAIR:  "0x6F1747370B1CAcb911ad6D4477b718633DB328c8".toLowerCase(),
+  USDC_HEX_V2_PAIR: "0xC475332e92561CD58f278E4e2eD76c17D5b50f05".toLowerCase()
 };
 
-// -------------------------------
-// Asset registry with decimals (MUST MATCH FACTORY CONFIG)
-// -------------------------------
+// ASSETS config (must match factory)
 const ASSETS = {
   PLS: {
     key: ethersLib.utils.keccak256(ethersLib.utils.toUtf8Bytes("PLS")),
     label: "PLS",
     isNative: true,
-
     lockToken: ADDR.WPLS,
     lockDecimals: 18,
-
-    // Primary = WPLS/DAI V1
     primaryQuote: ADDR.DAI,
     primaryQuoteDecimals: 18,
     primaryPair: ADDR.PLS_DAI_V1_PAIR,
     primaryFeedLabel: "PulseX V1 WPLS/DAI",
-
-    // Backup = WPLS/DAI V2
     backupQuote: ADDR.DAI,
     backupQuoteDecimals: 18,
     backupPair: ADDR.PLS_DAI_V2_PAIR,
@@ -108,15 +81,12 @@ const ASSETS = {
     key: ethersLib.utils.keccak256(ethersLib.utils.toUtf8Bytes("PDAI")),
     label: "pDAI",
     isNative: false,
-
     lockToken: ADDR.PDAI,
     lockDecimals: 18,
-
     primaryQuote: ADDR.DAI,
     primaryQuoteDecimals: 18,
     primaryPair: ADDR.PDAI_DAI_V2_PAIR,
     primaryFeedLabel: "PulseX V2 pDAI/DAI",
-
     backupQuote: ADDR.DAI,
     backupQuoteDecimals: 18,
     backupPair: ADDR.PDAI_DAI_V1_PAIR,
@@ -126,25 +96,18 @@ const ASSETS = {
     key: ethersLib.utils.keccak256(ethersLib.utils.toUtf8Bytes("HEX")),
     label: "HEX",
     isNative: false,
-
     lockToken: ADDR.HEX,
     lockDecimals: 8,
-
-    // Primary: USDC/HEX V2
     primaryQuote: ADDR.USDC,
     primaryQuoteDecimals: 6,
     primaryPair: ADDR.USDC_HEX_V2_PAIR,
     primaryFeedLabel: "PulseX V2 USDC/HEX",
-
-    // Backup: HEX/DAI V1
     backupQuote: ADDR.DAI,
     backupQuoteDecimals: 18,
     backupPair: ADDR.HEX_DAI_V1_PAIR,
     backupFeedLabel: "PulseX V1 HEX/DAI"
   }
 };
-
-// For any older code that references ASSETS[code].pair
 Object.keys(ASSETS).forEach(code => {
   ASSETS[code].pair = ASSETS[code].primaryPair;
 });
@@ -205,6 +168,7 @@ let countdownInterval;
 const connectBtn       = document.getElementById("connectBtn");
 const walletSpan       = document.getElementById("walletAddress");
 const networkInfo      = document.getElementById("networkInfo");
+const themeToggleBtn   = document.getElementById("themeToggle");
 
 const assetSelect      = document.getElementById("assetSelect");
 const createForm       = document.getElementById("createForm");
@@ -222,6 +186,25 @@ const addVaultBtn      = document.getElementById("addVaultBtn");
 const manualAddStatus  = document.getElementById("manualAddStatus");
 
 const locksContainer   = document.getElementById("locksContainer");
+
+// -------------------------------
+// THEME TOGGLE
+// -------------------------------
+(function initTheme() {
+  const saved = localStorage.getItem("vault-theme");
+  if (saved === "light") {
+    document.body.classList.add("light-theme");
+    themeToggleBtn.textContent = "🌚 Night";
+  } else {
+    themeToggleBtn.textContent = "🌙 Night";
+  }
+})();
+
+themeToggleBtn.addEventListener("click", () => {
+  const isLight = document.body.classList.toggle("light-theme");
+  localStorage.setItem("vault-theme", isLight ? "light" : "dark");
+  themeToggleBtn.textContent = isLight ? "🌚 Night" : "🌙 Night";
+});
 
 // -------------------------------
 // CONNECT
@@ -260,20 +243,15 @@ async function connect() {
 connectBtn.addEventListener("click", connect);
 
 // -------------------------------
-// PRICE HELPERS (AMM → USD float)
+// PRICE HELPERS
 // -------------------------------
 function computeDisplayDecimals(lockDecimals, quoteDecimals) {
-  // priceBN = quoteRes * 1e18 / lockRes
-  // realPrice = quoteRes * 10^lockDec / (lockRes * 10^quoteDec)
-  // so realPrice = priceBN / (10^(18 + quoteDec - lockDec))
   return 18 + quoteDecimals - lockDecimals;
 }
-
 function priceBNToUsdFloat(priceBN, lockDecimals, quoteDecimals) {
   const displayDecimals = computeDisplayDecimals(lockDecimals, quoteDecimals);
   return Number(ethersLib.utils.formatUnits(priceBN, displayDecimals));
 }
-
 function quoteResToUsdFloat(quoteResBN, quoteDecimals) {
   return Number(ethersLib.utils.formatUnits(quoteResBN, quoteDecimals));
 }
@@ -311,7 +289,6 @@ async function refreshGlobalPrice() {
       );
     }
 
-    // Decide effective feed: higher USD-normalized reserves, tie-break by price
     let chosenSource = "none";
     let chosenPriceFloat = null;
 
@@ -342,7 +319,6 @@ async function refreshGlobalPrice() {
       chosenPriceFloat = null;
     }
 
-    // UI text
     let html = "";
 
     html += `<div class="small"><b>Primary feed:</b> ${cfg.primaryFeedLabel}<br>`;
@@ -377,7 +353,6 @@ async function refreshGlobalPrice() {
 
     globalPriceDiv.innerHTML = html;
 
-    // Raw debug
     let rawText = "";
     if (primaryInfo.ok) {
       rawText += `Primary raw 1e18: ${primaryInfo.priceBN.toString()}\n`;
@@ -403,7 +378,6 @@ async function refreshGlobalPrice() {
 setInterval(refreshGlobalPrice, 15000);
 assetSelect.addEventListener("change", refreshGlobalPrice);
 
-// Compute price + liquidity for a pair
 async function computePairPriceAndLiquidity(pairAddr, lockToken, lockDecimals, quoteToken, quoteDecimals) {
   if (!pairAddr) return { ok: false };
 
@@ -454,7 +428,6 @@ async function computePairPriceAndLiquidity(pairAddr, lockToken, lockDecimals, q
 function localKey() {
   return "generic-vaults-" + (userAddress || "anon");
 }
-
 function getLocalVaults() {
   if (!userAddress) return [];
   const raw = localStorage.getItem(localKey());
@@ -467,7 +440,6 @@ function getLocalVaults() {
     return [];
   }
 }
-
 function saveLocalVaultAddress(addr) {
   const list = getLocalVaults();
   const lower = addr.toLowerCase();
@@ -517,7 +489,7 @@ createForm.addEventListener("submit", async (e) => {
           break;
         }
       } catch {
-        // ignore non-matching logs
+        // ignore
       }
     }
 
@@ -699,7 +671,7 @@ function detectAssetLabel(lockTokenAddr, isNative) {
 }
 
 // -------------------------------
-// RENDER LOCK CARDS
+// RENDER LOCK CARDS (4-column compact layout + collapse)
 // -------------------------------
 function renderLocks() {
   if (!locks.length) {
@@ -711,10 +683,12 @@ function renderLocks() {
 
   locksContainer.innerHTML = locks.map(lock => {
 
+    //
+    // ERROR CARD
+    //
     if (lock.error) {
       return `
-        <div class="card vault-card">
-          <div class="vault-asset-label">UNKNOWN</div>
+        <div class="card vault-card" data-addr="${lock.address}">
           <div class="small">Error loading vault at ${lock.address}</div>
           <button onclick="removeVault('${lock.address}')"
                   style="margin-top:10px;background:#b91c1c;">
@@ -726,6 +700,9 @@ function renderLocks() {
 
     const assetLabel = lock.assetLabel;
 
+    //
+    // PRICES
+    //
     const thresholdFloat = parseFloat(
       ethersLib.utils.formatUnits(lock.threshold, 18)
     );
@@ -734,24 +711,40 @@ function renderLocks() {
       ? parseFloat(ethersLib.utils.formatUnits(lock.chosenPriceBN, 18))
       : 0;
 
+    //
+    // BALANCE
+    //
     const balanceDisplayDecimals = (assetLabel === "HEX") ? 8 : 18;
     const balanceFloat = parseFloat(
       ethersLib.utils.formatUnits(lock.balanceBN, balanceDisplayDecimals)
     );
 
+    //
+    // STATUS
+    //
     const withdrawnTag = lock.withdrawn;
     const canWithdraw = lock.canWithdraw && !lock.withdrawn;
 
+    const status =
+      withdrawnTag
+        ? '<span class="tag status-warn">WITHDRAWN</span>'
+        : canWithdraw
+        ? '<span class="tag status-ok">UNLOCKABLE</span>'
+        : '<span class="tag status-bad">LOCKED</span>';
+
+    //
+    // PRICE GOAL %
+    //
     let priceGoalPct = 0;
     if (thresholdFloat > 0 && currentPriceFloat > 0) {
       priceGoalPct = (currentPriceFloat / thresholdFloat) * 100;
     }
     if (priceGoalPct > 100) priceGoalPct = 100;
     if (priceGoalPct < 0)   priceGoalPct = 0;
-    if (canWithdraw && currentPriceFloat >= thresholdFloat) {
-      priceGoalPct = 100;
-    }
 
+    //
+    // TIME GOAL %
+    //
     let timeGoalPct = 0;
     let timeLabel = "";
     if (lock.startTime && lock.unlockTime && lock.unlockTime > lock.startTime) {
@@ -765,141 +758,158 @@ function renderLocks() {
       timeLabel = "N/A";
     }
 
-    const status =
-      withdrawnTag
-        ? '<span class="tag status-warn">WITHDRAWN</span>'
-        : canWithdraw
-        ? '<span class="tag status-ok">UNLOCKABLE</span>'
-        : '<span class="tag status-bad">LOCKED</span>';
-
     const timeBarStyle = `width:${timeGoalPct.toFixed(1)}%;`;
 
-    let feedText = "";
-    if (!lock.priceValid) {
-      feedText = `<span class="status-bad">No valid price feeds – time unlock only.</span>`;
-    } else {
-      const primaryStatus = lock.primaryValid ? "ok" : "unavailable";
-      const backupStatus  = lock.backupValid  ? "ok" : "unavailable";
+    //
+    // FEED DETAILS
+    //
+    const primaryPriceFloat = lock.primaryValid
+      ? parseFloat(ethersLib.utils.formatUnits(lock.primaryPriceBN, 18))
+      : 0;
 
-      const primaryPriceFloat = lock.primaryValid
-        ? parseFloat(ethersLib.utils.formatUnits(lock.primaryPriceBN, 18))
-        : 0;
+    const backupPriceFloat = lock.backupValid
+      ? parseFloat(ethersLib.utils.formatUnits(lock.backupPriceBN, 18))
+      : 0;
 
-      const backupPriceFloat = lock.backupValid
-        ? parseFloat(ethersLib.utils.formatUnits(lock.backupPriceBN, 18))
-        : 0;
+    const primaryQuoteResFloat = lock.primaryQuoteResBN.gt(0)
+      ? quoteResToUsdFloat(lock.primaryQuoteResBN, lock.primaryQuoteDecimals)
+      : 0;
 
-      const primaryQuoteResFloat = lock.primaryQuoteResBN.gt(0)
-        ? quoteResToUsdFloat(lock.primaryQuoteResBN, lock.primaryQuoteDecimals)
-        : 0;
+    const backupQuoteResFloat = lock.backupQuoteResBN.gt(0)
+      ? quoteResToUsdFloat(lock.backupQuoteResBN, lock.backupQuoteDecimals)
+      : 0;
 
-      const backupQuoteResFloat = lock.backupQuoteResBN.gt(0)
-        ? quoteResToUsdFloat(lock.backupQuoteResBN, lock.backupQuoteDecimals)
-        : 0;
+    const effectiveLine =
+      lock.usedPrimary
+        ? `Effective price (for this vault now): $${formatLockPrice(currentPriceFloat)} via PRIMARY feed.`
+        : lock.usedBackup
+        ? `Effective price (for this vault now): $${formatLockPrice(currentPriceFloat)} via BACKUP feed.`
+        : `Effective price (for this vault now): $${formatLockPrice(currentPriceFloat)}.`;
 
-      feedText += `<div class="small">Primary feed: status=${primaryStatus}`;
-      if (lock.primaryValid) {
-        feedText += `, price≈$${formatLockPrice(primaryPriceFloat)}, USD reserves≈${formatReserveK(primaryQuoteResFloat)}`;
-      }
-      feedText += `</div>`;
+    //
+    // ADDRESS
+    //
+    const addrFull = lock.address;
 
-      feedText += `<div class="small">Backup feed: status=${backupStatus}`;
-      if (lock.backupValid) {
-        feedText += `, price≈$${formatLockPrice(backupPriceFloat)}, USD reserves≈${formatReserveK(backupQuoteResFloat)}`;
-      }
-      feedText += `</div>`;
-
-      if (lock.usedPrimary) {
-        feedText += `<div class="small">Effective price (for this vault now): <b>$${formatLockPrice(currentPriceFloat)}</b> via <b>PRIMARY</b> feed.</div>`;
-      } else if (lock.usedBackup) {
-        feedText += `<div class="small">Effective price (for this vault now): <b>$${formatLockPrice(currentPriceFloat)}</b> via <b>BACKUP</b> feed.</div>`;
-      } else {
-        feedText += `<div class="small">Effective price (for this vault now): <b>$${formatLockPrice(currentPriceFloat)}</b>.</div>`;
-      }
-    }
-
+    //
+    // RENDER CARD
+    //
     return `
-      <div class="card vault-card ${canWithdraw ? 'vault-unlockable' : ''}">
-        <div class="vault-asset-label">${assetLabel} VAULT</div>
+      <div class="card vault-card ${canWithdraw ? 'vault-unlockable' : ''}" data-addr="${lock.address}">
 
-        <!-- Address + copy -->
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;width:100%;max-width:450px;">
-          <input class="mono"
-            value="${lock.address}"
-            readonly
-            style="
-              background:#020617;
-              color:#a5b4fc;
-              border:1px solid #4b5563;
-              width:100%;
-              padding:4px;
-              border-radius:6px;
-            " />
-          <div class="copy-icon-btn" onclick="copyAddr('${lock.address}', event)">
-            <svg viewBox="0 0 24 24">
-              <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 
-                       0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 
-                       2-.9 2-2V7c0-1.1-.9-2-2-2zm0 
-                       16H8V7h11v14z"/>
-            </svg>
-          </div>
-        </div>
-
-        ${status}
-
-        <div style="
-          display:flex;
-          flex-direction:row;
-          align-items:flex-start;
-          gap:16px;
-          margin-top:10px;
-          flex-wrap:nowrap;
-          width:fit-content;
-          max-width:100%;
-        ">
-
-          <div style="display:flex;flex-direction:column;flex:0 1 auto;">
-            <div><strong>Target:</strong> 1 ${assetLabel} ≥ $${formatLockPrice(thresholdFloat)}</div>
-            <div><strong>Current:</strong> $${formatLockPrice(currentPriceFloat)}</div>
-            <div><strong>Backup unlock:</strong> ${formatTimestamp(lock.unlockTime)}</div>
-            <div><strong>Locked:</strong> ${balanceFloat.toFixed(4)} ${assetLabel}</div>
-            <div style="margin-top:4px;">${feedText}</div>
+        <!-- HEADER ROW -->
+        <div class="vault-header">
+          <div class="vault-header-left">
+            <span class="vault-asset-label">${assetLabel} VAULT</span>
+            ${status}
           </div>
 
-          <div class="price-goal-wrapper" style="flex:0 0 auto;margin-left:8px;">
-            <div class="small" style="text-align:center;">Price goal</div>
-            <div style="display:flex;align-items:center;gap:6px;">
-              <div class="price-goal-pie"
-                   style="background:conic-gradient(#22c55e ${priceGoalPct}%, #020617 0);">
+          <div class="vault-header-right">
+            <div style="display:flex;align-items:center;gap:4px;position:relative;">
+              <input class="mono"
+                value="${addrFull}"
+                readonly
+                style="
+                  background:var(--input-bg);
+                  color:#a5b4fc;
+                  border:1px solid var(--input-border);
+                  min-width:260px;
+                  max-width:320px;
+                  padding:3px 4px;
+                  border-radius:6px;
+                " />
+              <div class="copy-icon-btn" onclick="copyAddr('${addrFull}', event)">
+                <svg viewBox="0 0 24 24">
+                  <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 
+                           0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 
+                           2-.9 2-2V7c0-1.1-.9-2-2-2zm0 
+                           16H8V7h11v14z"/>
+                </svg>
               </div>
-              <div class="small">${priceGoalPct.toFixed(0)}%</div>
+              <button class="maximize-btn" onclick="maximizeVault('${addrFull}')">⬆ Max</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- BODY (4 COLUMNS) -->
+        <div class="vault-body">
+
+          <!-- COL 1: Main Info -->
+          <div class="vault-col-main">
+            <div><strong>target:</strong> 1 ${assetLabel} ≥ $${formatLockPrice(thresholdFloat)}</div>
+            <div><strong>current:</strong> $${formatLockPrice(currentPriceFloat)}</div>
+            <div style="margin-top:4px;">
+              <strong>backup unlock:</strong> ${formatTimestamp(lock.unlockTime)}
+            </div>
+            <div><strong>locked:</strong> ${balanceFloat.toFixed(4)} ${assetLabel}</div>
+          </div>
+
+          <!-- COL 2: Buttons (bottom aligned) -->
+          <div class="vault-col-buttons">
+            <button onclick="withdrawVault('${addrFull}')"
+              ${(!canWithdraw) ? "disabled" : ""}>
+              Withdraw
+            </button>
+
+            <button onclick="removeVault('${addrFull}')"
+              style="background:#b91c1c;">
+              Remove
+            </button>
+          </div>
+
+          <!-- COL 3: Pie + Time (stacked, top-aligned) -->
+          <div class="vault-col-chart">
+            <div class="price-goal-pie"
+                 style="background:conic-gradient(#22c55e ${priceGoalPct}%, #020617 0);"></div>
+
+            <div class="time-progress-wrapper">
+              <div class="time-progress-bar-bg">
+                <div class="time-progress-bar-fill" style="${timeBarStyle}"></div>
+              </div>
+              <div class="small">${timeLabel}</div>
             </div>
           </div>
 
-          <div class="time-progress-wrapper" style="flex:0 0 auto;margin-left:8px;max-width:160px;">
-            <div class="small">Time goal</div>
-            <div class="time-progress-bar-bg">
-              <div class="time-progress-bar-fill" style="${timeBarStyle}"></div>
+          <!-- COL 4: Feed details and minimize btn -->
+          <div class="vault-col-feeds">
+
+            <div>
+              <div>PRIMARY feed: status=${lock.primaryValid ? "ok" : "unavailable"}, 
+                   price=$${formatLockPrice(primaryPriceFloat)}, 
+                   USD reserves≈${formatReserveK(primaryQuoteResFloat)}
+              </div>
+
+              <div>BACKUP feed: status=${lock.backupValid ? "ok" : "unavailable"}, 
+                   price=$${formatLockPrice(backupPriceFloat)}, 
+                   USD reserves≈${formatReserveK(backupQuoteResFloat)}
+              </div>
+
+              <div>${effectiveLine}</div>
             </div>
-            <div class="small">${timeLabel}</div>
+
+            <button class="minimize-btn" onclick="minimizeVault('${addrFull}')">▾ Min</button>
           </div>
 
-        </div>
+        </div><!-- end vault-body -->
 
-        <div style="margin-top:10px;">
-          <button onclick="withdrawVault('${lock.address}')"
-            ${(!canWithdraw) ? "disabled" : ""}>
-            Withdraw
-          </button>
-
-          <button onclick="removeVault('${lock.address}')"
-            style="margin-left:10px;background:#b91c1c;">
-            Remove
-          </button>
-        </div>
-      </div>
-    `;
+      </div>`;
   }).join("");
+
+}
+
+// -------------------------------
+// COLLAPSE / EXPAND
+// -------------------------------
+function minimizeVault(addr) {
+  const card = document.querySelector(`.vault-card[data-addr="${addr}"]`);
+  if (!card) return;
+  card.classList.add("collapsed");
+}
+
+function maximizeVault(addr) {
+  const card = document.querySelector(`.vault-card[data-addr="${addr}"]`);
+  if (!card) return;
+  card.classList.remove("collapsed");
 }
 
 // -------------------------------
@@ -937,13 +947,14 @@ function removeVault(addr) {
 function copyAddr(addr, ev) {
   navigator.clipboard.writeText(addr).then(() => {
     try {
-      if (!ev || !ev.target) return;
       const btn = ev.target.closest(".copy-icon-btn");
       if (!btn) return;
+
       const popup = document.createElement("div");
       popup.className = "copy-popup";
       popup.textContent = "Copied";
       btn.appendChild(popup);
+
       setTimeout(() => popup.remove(), 900);
     } catch (err) {
       console.error("Copy popup error:", err);
@@ -954,7 +965,7 @@ function copyAddr(addr, ev) {
 }
 
 // -------------------------------
-// MANUAL ADD
+// ADD VAULT
 // -------------------------------
 addVaultBtn.addEventListener("click", async () => {
   if (!provider) {
