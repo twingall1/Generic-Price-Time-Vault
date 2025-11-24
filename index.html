@@ -371,6 +371,20 @@
     .maximize-btn {
       flex: 0 0 auto;
     }
+    /* --- MOVE ADDRESS BAR LEFTWARD + WIDEN INPUT (override only) --- */
+    
+    .vault-header-actions {
+      position: relative;
+      right: 240px;   /* shift left – adjust as needed */
+    }
+    
+    .vault-header-actions input {
+      max-width: 420px !important;  /* makes address 20–25% wider */
+    }
+    
+    .vault-header {
+      align-items: flex-start;
+    }
 
   </style>
 </head>
