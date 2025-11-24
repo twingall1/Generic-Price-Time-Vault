@@ -332,6 +332,46 @@
     .vault-card.collapsed .maximize-btn {
       display: inline-flex;
     }
+    /* --- Fix for vault card header: address bar + copy icon + min icon --- */
+
+    .vault-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .vault-header-actions input {
+      flex: 1 1 auto;
+      max-width: 240px;  /* reduce width to make space */
+    }
+    
+    .copy-icon-btn {
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--copy-bg);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    
+    .copy-icon-btn:hover {
+      background: var(--copy-bg-hover);
+    }
+    
+    .copy-icon-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: #fff;
+    }
+    
+    .minimize-btn,
+    .maximize-btn {
+      flex: 0 0 auto;
+    }
+
   </style>
 </head>
 
