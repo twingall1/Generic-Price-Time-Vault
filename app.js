@@ -350,9 +350,9 @@ async function refreshGlobalPrice() {
     }
     if (cfg.backupPair) {
       if (backupInfo.ok) {
-        rawText += `,   𝟐° raw 1e18: ${backupInfo.priceBN.toString()}`;
+        rawText += `,&nbsp;&nbsp;𝟐° raw 1e18: ${backupInfo.priceBN.toString()}`;
       } else {
-        rawText += `,   𝟐°: unavailable`;
+        rawText += `,&nbsp;&nbsp;𝟐°: unavailable`;
       }
     }
     globalPriceRaw.textContent = rawText.trim();
