@@ -334,7 +334,7 @@ async function refreshGlobalPrice() {
     if (chosenSource === "primary") {
       html += `Effective price (logic): <b>$${formatLockPrice(chosenPriceFloat)}</b> via 𝟏° feed (larger USD-side reserves).`;
     } else if (chosenSource === "backup") {
-      html += `Effective price (logic): <b>$${formatLockPrice(chosenPriceFloat)}</b> via 𝟐° feed(larger USD-side reserves).`;
+      html += `Effective price (logic): <b>$${formatLockPrice(chosenPriceFloat)}</b> via 𝟐° feed (larger USD-side reserves).`;
     } else {
       html += `No valid price feeds at this moment – only time unlock will work.`;
     }
@@ -766,7 +766,7 @@ function renderLocks() {
                    padding:3px 4px;
                    border-radius:6px;
                    width: 400px;
-                   max-width:310px;
+                   max-width:400px;
                    overflow:hidden;
                    text-overflow:ellipsis;
                    white-space:nowrap;
