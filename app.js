@@ -740,9 +740,9 @@ function renderLocks() {
 
     const effectiveLine =
       lock.usedPrimary
-        ? `Effective: price=$${formatLockPrice(currentPriceFloat)} via PRIMARY`
+        ? `Effective: price=$${formatLockPrice(currentPriceFloat)} via 1° feed`
         : lock.usedBackup
-        ? `Effective: price=$${formatLockPrice(currentPriceFloat)} via BACKUP`
+        ? `Effective: price=$${formatLockPrice(currentPriceFloat)} via 2° feed`
         : `Effective: price=$${formatLockPrice(currentPriceFloat)}`;
 
     // Render card
@@ -765,7 +765,7 @@ function renderLocks() {
                    border:1px solid var(--input-border);
                    padding:3px 4px;
                    border-radius:6px;
-                   width: 310px;
+                   width: 370px;
                    max-width:310px;
                    overflow:hidden;
                    text-overflow:ellipsis;
@@ -845,10 +845,10 @@ function renderLocks() {
           <div class="vault-col-feeds">
             <div>
               <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                PRIMARY: price=$${formatLockPrice(primaryPriceFloat)}, USD reserves≈${formatReserveK(primaryQuoteResFloat)}
+                1°: $${formatLockPrice(primaryPriceFloat)}, $reserves ≈ ${formatReserveK(primaryQuoteResFloat)}
               </div>
               <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                BACKUP:  price=$${formatLockPrice(backupPriceFloat)}, USD reserves≈${formatReserveK(backupQuoteResFloat)}
+                2°: $${formatLockPrice(backupPriceFloat)}, $reserves ≈ ${formatReserveK(backupQuoteResFloat)}
               </div>
               <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                 ${effectiveLine}
