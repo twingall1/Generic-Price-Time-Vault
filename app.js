@@ -350,9 +350,9 @@ async function refreshGlobalPrice() {
     }
     if (cfg.backupPair) {
       if (backupInfo.ok) {
-        rawText += `𝟐° raw 1e18: ${backupInfo.priceBN.toString()}`;
+        rawText += `  |  𝟐° raw 1e18: ${backupInfo.priceBN.toString()}`;
       } else {
-        rawText += `𝟐°: unavailable`;
+        rawText += `  |  𝟐°: unavailable`;
       }
     }
     globalPriceRaw.textContent = rawText.trim();
@@ -743,7 +743,7 @@ function renderLocks() {
         ? `Effective price= $${formatLockPrice(currentPriceFloat)} via 𝟏° feed`
         : lock.usedBackup
         ? `Effective price= $${formatLockPrice(currentPriceFloat)} via 𝟐° feed`
-        : `Effective price= $${formatLockPrice(currentPriceFloat)}`;
+        : `Effective price= feeds unavailable — using time unlock only`;
 
     // Render card
     return `
