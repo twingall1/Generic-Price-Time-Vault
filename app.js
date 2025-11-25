@@ -350,9 +350,9 @@ async function refreshGlobalPrice() {
     }
     if (cfg.backupPair) {
       if (backupInfo.ok) {
-        rawText += `  |  𝟐° raw 1e18: ${backupInfo.priceBN.toString()}`;
+        rawText += `,  𝟐° raw 1e18: ${backupInfo.priceBN.toString()}`;
       } else {
-        rawText += `  |  𝟐°: unavailable`;
+        rawText += `,  𝟐°: unavailable`;
       }
     }
     globalPriceRaw.textContent = rawText.trim();
@@ -803,7 +803,7 @@ function renderLocks() {
               &nbsp;<span class="col1-value-bold">$${formatLockPrice(currentPriceFloat)}</span>
             </div>
             <div class="col1-line">
-              time&nbsp;unlock&nbsp;:
+              time&nbsp;unlock&nbsp;&nbsp;:
               &nbsp;<span class="col1-value-bold">${formatTimestamp(lock.unlockTime)}</span>
             </div>
             <div class="col1-line">
