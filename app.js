@@ -448,7 +448,7 @@ async function restoreAllVaults() {
     manualAddStatus.textContent = "Scanning chain for vaults...";
 
     const filter = {
-      address: "0xAa64fc582874a4d1855582E0875A8ACf39f3E4CB",  // <--- YOUR FACTORY
+      address: FACTORY_ADDRESS,  // <--- YOUR FACTORY
       fromBlock: 0,
       toBlock: "latest",
       topics: [
@@ -1082,6 +1082,9 @@ addVaultBtn.addEventListener("click", async () => {
   manualVaultInput.value = "";
   await loadLocalVaults();
 });
+// RESTORE ALL VAULTS (button to the right of ADD)
+document.getElementById("restoreVaultsBtn")
+        .addEventListener("click", restoreAllVaults);
 
 // UTILITIES
 function formatTimestamp(ts) {
