@@ -350,7 +350,7 @@
       flex-direction: column;
     }
   
-    /* Clean vault header after merging sections */
+        /* Clean vault header after merging sections */
     .vault-header {
       display: flex !important;
       align-items: center !important;
@@ -358,6 +358,18 @@
       white-space: nowrap !important;
       justify-content: flex-start !important;
       flex-wrap: nowrap !important;
+    }
+        /* Horizontal rows for Create New Lock */
+    .form-row-h {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .form-row-h label {
+      min-width: 170px;   /* keeps all labels aligned nicely */
+      white-space: nowrap;
     }
 
   </style>
