@@ -194,7 +194,7 @@ const locksContainer   = document.getElementById("locksContainer");
     document.body.classList.add("light-theme");
     themeToggleBtn.textContent = "🌚 Night";
   } else {
-    themeToggleBtn.textContent = "🌙 Night";
+    themeToggleBtn.textContent = "🌞 Day";
   }
 })();
 
