@@ -411,7 +411,7 @@
         <form id="createForm">
         
           <div class="form-row-h">
-            <label>Asset</label>
+            <label>Lock Token</label>
             <select id="assetSelect">
               <option value="PLS">PLS (native)</option>
               <option value="PDAI">pDAI (token)</option>
@@ -420,12 +420,12 @@
           </div>
         
           <div class="form-row-h">
-            <label>Target price (USD per 1 unit)</label>
+            <label>Target price ($)</label>
             <input id="targetPrice" type="text" placeholder="0.0100" required />
           </div>
         
           <div class="form-row-h">
-            <label>Time unlock date &amp; time</label>
+            <label>Unlock Time</label>
             <input id="unlockDateTime" type="datetime-local" required />
             <button type="submit" id="createBtn" style="margin-left:12px;">Create Vault</button>
           </div>
