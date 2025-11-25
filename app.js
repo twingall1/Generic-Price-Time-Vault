@@ -315,7 +315,7 @@ async function refreshGlobalPrice() {
       html += `Status: <span class="status-bad">unavailable</span>`;
     } else {
       html += `Status: <span class="status-ok">ok</span><br>`;
-      html += `Price: 1 ${cfg.label} ≈ $${formatLockPrice(primaryInfo.priceFloat)}, Quote reserves: ${formatReserveK(primaryInfo.quoteResFloat)} USD side</div>`;
+      html += `Price: 1 ${cfg.label} ≈ $${formatLockPrice(primaryInfo.priceFloat)}, &nbsp;USD-side reserves: $${formatReserveK(primaryInfo.quoteResFloat)}</div>`;
 
     }
 
@@ -325,7 +325,7 @@ async function refreshGlobalPrice() {
         html += `Status: <span class="status-bad">unavailable</span>`;
       } else {
         html += `Status: <span class="status-ok">ok</span><br>`;
-        html += `Price: 1 ${cfg.label} ≈ $${formatLockPrice(backupInfo.priceFloat)}, Quote reserves: ${formatReserveK(backupInfo.quoteResFloat)} USD side</div>`;
+        html += `Price: 1 ${cfg.label} ≈ $${formatLockPrice(backupInfo.priceFloat)}, &nbsp;USD-side reserves: $${formatReserveK(backupInfo.quoteResFloat)}</div>`;
 
       }
     }
