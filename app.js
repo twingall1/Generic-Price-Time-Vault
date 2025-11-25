@@ -229,7 +229,7 @@ async function connect() {
     if (countdownInterval) clearInterval(countdownInterval);
     countdownInterval = setInterval(() => {
       if (locks.length) renderLocks();
-    }, 1000);
+    }, 10000);
 
   } catch (err) {
     alert("Connection failed: " + err.message);
@@ -364,7 +364,7 @@ async function refreshGlobalPrice() {
   }
 }
 
-setInterval(refreshGlobalPrice, 15000);
+setInterval(refreshGlobalPrice, 10000);
 assetSelect.addEventListener("change", refreshGlobalPrice);
 
 async function computePairPriceAndLiquidity(pairAddr, lockToken, lockDecimals, quoteToken, quoteDecimals) {
