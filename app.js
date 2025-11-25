@@ -201,7 +201,7 @@ const locksContainer   = document.getElementById("locksContainer");
 themeToggleBtn.addEventListener("click", () => {
   const isLight = document.body.classList.toggle("light-theme");
   localStorage.setItem("vault-theme", isLight ? "light" : "dark");
-  themeToggleBtn.textContent = isLight ? "🌚 Night" : "🌙 Night";
+  themeToggleBtn.textContent = isLight ? "🌚 Night" : "🌞 Day";
 });
 
 // CONNECT
@@ -332,9 +332,9 @@ async function refreshGlobalPrice() {
 
     html += `<div class="small" style="margin-top:8px;">`;
     if (chosenSource === "primary") {
-      html += `Effective price (logic): <b>$${formatLockPrice(chosenPriceFloat)}</b> via 𝟏° feed (larger USD-side reserves).`;
+      html += `Effective price (logic): <b>$${formatLockPrice(chosenPriceFloat)}</b> via <b>𝟏° feed</b> (larger USD-side reserves).`;
     } else if (chosenSource === "backup") {
-      html += `Effective price (logic): <b>$${formatLockPrice(chosenPriceFloat)}</b> via 𝟐° feed (larger USD-side reserves).`;
+      html += `Effective price (logic): <b>$${formatLockPrice(chosenPriceFloat)}</b> via <b>𝟐° feed</b> (larger USD-side reserves).`;
     } else {
       html += `No valid price feeds at this moment – only time unlock will work.`;
     }
