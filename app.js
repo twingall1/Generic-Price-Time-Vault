@@ -332,9 +332,9 @@ async function refreshGlobalPrice() {
 
     html += `<div class="small" style="margin-top:8px;">`;
     if (chosenSource === "primary") {
-      html += `Effective price (logic): <b>$${formatLockPrice(chosenPriceFloat)}</b> via <b>primary feed</b>.`;
+      html += `Effective price (logic): <b>$${formatLockPrice(chosenPriceFloat)}</b> via <b>1°</b> feed.`;
     } else if (chosenSource === "backup") {
-      html += `Effective price (logic): <b>$${formatLockPrice(chosenPriceFloat)}</b> via <b>backup feed</b>.`;
+      html += `Effective price (logic): <b>$${formatLockPrice(chosenPriceFloat)}</b> via <b>2°</b> feed.`;
     } else {
       html += `No valid price feeds at this moment – only time unlock will work.`;
     }
@@ -344,15 +344,15 @@ async function refreshGlobalPrice() {
 
     let rawText = "";
     if (primaryInfo.ok) {
-      rawText += `Primary raw 1e18: ${primaryInfo.priceBN.toString()}\n`;
+      rawText += `<b>1°</b> raw 1e18: ${primaryInfo.priceBN.toString()}\n`;
     } else {
-      rawText += `Primary: unavailable\n`;
+      rawText += `<b>1°</b>: unavailable\n`;
     }
     if (cfg.backupPair) {
       if (backupInfo.ok) {
-        rawText += `Backup raw 1e18: ${backupInfo.priceBN.toString()}`;
+        rawText += `<b>2°</b> raw 1e18: ${backupInfo.priceBN.toString()}`;
       } else {
-        rawText += `Backup: unavailable`;
+        rawText += `<b>2°</b>: unavailable`;
       }
     }
     globalPriceRaw.textContent = rawText.trim();
@@ -740,9 +740,9 @@ function renderLocks() {
 
     const effectiveLine =
       lock.usedPrimary
-        ? `Effective: price=$${formatLockPrice(currentPriceFloat)} via 1° feed`
+        ? `Effective: price=$${formatLockPrice(currentPriceFloat)} via <b>1°</b> feed`
         : lock.usedBackup
-        ? `Effective: price=$${formatLockPrice(currentPriceFloat)} via 2° feed`
+        ? `Effective: price=$${formatLockPrice(currentPriceFloat)} via <b>2°</b> feed`
         : `Effective: price=$${formatLockPrice(currentPriceFloat)}`;
 
     // Render card
@@ -845,10 +845,10 @@ function renderLocks() {
           <div class="vault-col-feeds">
             <div>
               <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                1°: $${formatLockPrice(primaryPriceFloat)}, $reserves ≈ ${formatReserveK(primaryQuoteResFloat)}
+                <b>1°</b> : $${formatLockPrice(primaryPriceFloat)}, $reserves ≈ ${formatReserveK(primaryQuoteResFloat)}
               </div>
               <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
-                2°: $${formatLockPrice(backupPriceFloat)}, $reserves ≈ ${formatReserveK(backupQuoteResFloat)}
+                <b>2°</b> : $${formatLockPrice(backupPriceFloat)}, $reserves ≈ ${formatReserveK(backupQuoteResFloat)}
               </div>
               <div style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
                 ${effectiveLine}
