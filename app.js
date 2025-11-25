@@ -751,41 +751,43 @@ function renderLocks() {
 
         <!-- ROW 1: HEADER -->
         <div class="vault-header">
-          <div class="vault-header-left">
-            <span class="vault-asset-label">${assetLabel} VAULT</span>
-            ${status}
+        
+          <span class="vault-asset-label">${assetLabel} VAULT</span>
+          ${status}
+        
+          <!-- Address box -->
+          <input class="mono"
+                 value="${addrFull}"
+                 readonly
+                 style="
+                   background:var(--input-bg);
+                   color:#a5b4fc;
+                   border:1px solid var(--input-border);
+                   padding:3px 4px;
+                   border-radius:6px;
+                   width: 310px;
+                   max-width:310px;
+                   overflow:hidden;
+                   text-overflow:ellipsis;
+                   white-space:nowrap;
+                 " />
+        
+          <!-- Copy icon -->
+          <div class="copy-icon-btn" onclick="copyAddr('${addrFull}', event)">
+            <svg viewBox="0 0 24 24">
+              <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 
+                       0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 
+                       2-.9 2-2-2V7c0-1.1-.9-2-2-2zm0 
+                       16H8V7h11v14z"/>
+            </svg>
           </div>
-
-          <div style="flex:1 1 auto;"></div>
-
-          <div class="vault-header-actions">
-            <input class="mono"
-              value="${addrFull}"
-              readonly
-              style="
-                background:var(--input-bg);
-                color:#a5b4fc;
-                border:1px solid var(--input-border);
-                min-width:260px;
-                max-width:360px;
-                padding:3px 4px;
-                border-radius:6px;
-              " />
-
-            <div class="copy-icon-btn" onclick="copyAddr('${addrFull}', event)">
-              <svg viewBox="0 0 24 24">
-                <path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 
-                         0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 
-                         2-.9 2-2-2V7c0-1.1-.9-2-2-2zm0 
-                         16H8V7h11v14z"/>
-              </svg>
-            </div>
-
-            <!-- Minimize ▲ (visible when expanded), Maximize ▼ (visible when collapsed) -->
-            <button class="minimize-btn" onclick="minimizeVault('${addrFull}')">▲ Min</button>
-            <button class="maximize-btn" onclick="maximizeVault('${addrFull}')">▼ Max</button>
-          </div>
+        
+          <!-- Min/Max buttons -->
+          <button class="minimize-btn" onclick="minimizeVault('${addrFull}')">▲ Min</button>
+          <button class="maximize-btn" onclick="maximizeVault('${addrFull}')">▼ Max</button>
+        
         </div>
+
 
         <!-- BODY: 5 columns -->
         <div class="vault-body">
