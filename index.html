@@ -391,6 +391,21 @@
       border-radius: 4px;
       white-space: nowrap;
     }
+    /* Improve visibility of status tags in both themes */
+    .tag {
+      color: var(--text) !important;
+      font-weight: 600;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+    }
+    
+    /* Light theme contrast improvements */
+    body.light-theme .tag {
+      background: #e7e7e7 !important;
+      border: 1px solid #d0d0d0 !important;
+      color: #000 !important;
+    }
 
   </style>
 </head>
