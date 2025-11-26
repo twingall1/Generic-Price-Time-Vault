@@ -499,6 +499,11 @@ createForm.addEventListener("submit", async (e) => {
     if (isNaN(ts)) throw new Error("Invalid datetime");
     const unlockTime = Math.floor(ts / 1000);
 
+        // NEW: prevent past or current times
+    if (unlockTime <= Math.floor(Date.now() / 1000)) {
+      throw new Error("Unlock time must be in the future");
+    }
+    
     const tx = await factoryContract.createVault(cfg.key, th1e18, unlockTime);
     const rcpt = await tx.wait();
 
