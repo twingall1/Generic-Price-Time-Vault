@@ -406,17 +406,24 @@
       border: 1px solid #d0d0d0 !important;
       color: #000 !important;
     }
-    /* Color-coded status text */
+    /* Semantic colours for vault state */
     .status-bad {   /* LOCKED */
-      color: #d4a017 !important;    /* warm yellow-gold */
-    }
-    
-    .status-warn {  /* WITHDRAWN */
-      color: #c62828 !important;    /* strong but readable red */
+      color: #c62828 !important;   /* red */
     }
     
     .status-ok {    /* UNLOCKABLE */
-      color: #1f7a34 !important;    /* medium green, very readable */
+      color: #1f7a34 !important;   /* green */
+    }
+    
+    .status-warn {  /* WITHDRAWN */
+      color: #d4a017 !important;   /* yellow/gold */
+    }
+    
+    /* Light theme tag envelope (DON’T override text colour!) */
+    body.light-theme .tag {
+      background: #ffffffcc;     /* translucent white */
+      border: 1px solid #d0d0d0;
+      /* no color override */
     }
 
   </style>
