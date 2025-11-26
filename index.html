@@ -519,7 +519,10 @@
             <li>Contract logic lives fully on-chain (no admin keys).</li>
             <li>Thresholds are <b>USD × 1e18</b> per 1 token.</li>
             <li>Time unlock always works even if feeds fail.</li>
-            <li>Vault addresses stored only in local storage.</li>
+            <li>Vaults can be restored anytime from the on-chain registry.</li>
+            <li>Each vault is intended for a single price/time lock cycle.</li>
+            <li>Funds re-deposited after 1st withdrawal do <b>NOT</b> re-lock.</li>
+            <li>Withdrawn vaults re-deposited to show a <b>Rescue</b> button.</li>
           </ul>
         
           <div class="fee-note" style="margin-top:6px;">
