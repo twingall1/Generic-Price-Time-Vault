@@ -122,7 +122,7 @@ Object.keys(ASSETS).forEach(code => {
 // ABIs
 const factoryAbi = [
   "event VaultCreated(address indexed owner, address vault, bytes32 assetKey, uint256 priceThresholdUsd1e18, uint256 unlockTime)",
-  "function createVault(bytes32 assetKey, uint256 priceThresholdUsd1e18, uint256 unlockTime) external returns (address)"
+  "function createVault(bytes32 assetKey, uint256 priceThresholdUsd1e18, uint256 unlockTime) external returns (address)",
   "function getVaultsByOwner(address owner) view returns (address[] memory)"   // 👈 NEW
 ];
 
