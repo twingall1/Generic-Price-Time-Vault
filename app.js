@@ -999,6 +999,39 @@ async function updateVaultPrices() {
       }
       feedsInner.innerHTML = html;
     }
+        // === NEW: refresh locked balance every 5 seconds ===
+    try {
+      let newBalanceBN;
+      if (lock.isNative) {
+        newBalanceBN = await provider.getBalance(addr);
+      } else {
+        const erc20 = new ethersLib.Contract(lock.lockToken, erc20Abi, provider);
+        newBalanceBN = await erc20.balanceOf(addr);
+      }
+    
+      // Correct decimals
+      const balanceDisplayDecimals = (lock.assetLabel === "HEX") ? 8 : 18;
+      const newBalanceFloat = parseFloat(
+        ethersLib.utils.formatUnits(newBalanceBN, balanceDisplayDecimals)
+      );
+    
+      // Locate the "locked" line (4th line in col1)
+      const balanceSpan = card.querySelector(
+        ".vault-col-main .col1-line:nth-child(4) span.col1-value-bold"
+      );
+    
+      if (balanceSpan) {
+        balanceSpan.textContent =
+          `${newBalanceFloat.toFixed(4)} ${lock.assetLabel}`;
+      }
+    
+      // Save latest balance so future refreshes have accurate local state
+      lock.balanceBN = newBalanceBN;
+    
+    } catch (err) {
+      console.error("Balance refresh error:", err);
+    }
+
   }
 }
 
