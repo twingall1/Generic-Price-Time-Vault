@@ -146,7 +146,9 @@ const vaultAbi = [
   "function canWithdraw() view returns (bool)",
   "function secondsUntilTimeUnlock() view returns (uint256)",
   "function priceDetail() view returns (uint256,bool,uint256,uint256,bool,uint256,uint256,bool,bool,bool)",
-  "function withdraw() external"
+  "function withdraw() external",
+  "function rescue(address token) external",       // NEW
+  "function rescueNative() external"               // NEW
 ];
 
 const pairAbi = [
@@ -739,6 +741,9 @@ function renderLocks() {
     // New live behaviour
     const hasBalance = !lock.balanceBN.isZero();
     const canWithdraw = hasBalance;
+    // NEW — rescue button appears if withdrawn AND has balance
+    const showRescue = withdrawnTag && hasBalance;
+
 
     const status =
       withdrawnTag
@@ -863,14 +868,25 @@ function renderLocks() {
 
           <!-- COL 2: buttons (bottom-aligned) -->
           <div class="vault-col-buttons">
-            <button onclick="withdrawVault('${addrFull}')"
-              ${(!canWithdraw) ? "disabled" : ""}>
-              Withdraw
-            </button>
+          
+            ${(!withdrawnTag && canWithdraw) ? `
+              <button onclick="withdrawVault('${addrFull}')">
+                Withdraw
+              </button>
+            ` : ``}
+          
+            ${(withdrawnTag && hasBalance) ? `
+              <button onclick="rescueVault('${addrFull}')"
+                style="background:#1d4ed8;color:white;">
+                Rescue
+              </button>
+            ` : ``}
+          
             <button onclick="removeVault('${addrFull}')"
               style="background:#b91c1c;">
               Remove
             </button>
+          
           </div>
 
           <!-- COL 3: pie chart -->
@@ -1067,6 +1083,42 @@ async function withdrawVault(addr) {
     console.error("Withdraw error:", err);
   }
 }
+// RESCUE FUNDS (V9.3 rescue method)
+async function rescueVault(addr) {
+  try {
+    if (!signer) {
+      alert("Connect wallet first.");
+      return;
+    }
+
+    const lower = addr.toLowerCase();
+    const vault = new ethersLib.Contract(addr, vaultAbi, signer);
+
+    // Find vault in local state
+    const lock = locks.find(l => l.address === lower);
+    if (!lock) {
+      alert("Vault not found in memory.");
+      return;
+    }
+
+    let tx;
+    if (lock.isNative) {
+      // rescue native PLS
+      tx = await vault.rescueNative();
+    } else {
+      // rescue the lock token OR other ERC20 tokens
+      tx = await vault.rescue(lock.lockToken);
+    }
+
+    await tx.wait();
+    await loadLocalVaults();
+
+  } catch (err) {
+    alert("Rescue failed: " + (err && err.message ? err.message : String(err)));
+    console.error("Rescue error:", err);
+  }
+}
+
 
 // REMOVE VAULT
 function removeVault(addr) {
