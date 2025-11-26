@@ -49,7 +49,7 @@ function setCollapsed(addr, collapsed) {
 // -------------------------------
 // CONFIG
 // -------------------------------
-const FACTORY_ADDRESS = "0xAa64fc582874a4d1855582E0875A8ACf39f3E4CB".toLowerCase();
+const FACTORY_ADDRESS = "0xB6c8CDCdbB2d4799fdb301F034EBAE39e61606f0".toLowerCase();
 
 const ADDR = {
   DAI:  "0xefD766cCb38EaF1dfd701853BFCe31359239F305".toLowerCase(),
@@ -123,6 +123,7 @@ Object.keys(ASSETS).forEach(code => {
 const factoryAbi = [
   "event VaultCreated(address indexed owner, address vault, bytes32 assetKey, uint256 priceThresholdUsd1e18, uint256 unlockTime)",
   "function createVault(bytes32 assetKey, uint256 priceThresholdUsd1e18, uint256 unlockTime) external returns (address)"
+  "function getVaultsByOwner(address owner) view returns (address[] memory)"   // 👈 NEW
 ];
 
 const vaultAbi = [
@@ -445,36 +446,24 @@ async function restoreAllVaults() {
   }
 
   try {
-    manualAddStatus.textContent = "Scanning chain for vaults...";
+    manualAddStatus.textContent = "Checking contract registry...";
 
-    const filter = {
-      address: FACTORY_ADDRESS,  // <--- YOUR FACTORY
-      fromBlock: 0,
-      toBlock: "latest",
-      topics: [
-        ethersLib.utils.id("VaultCreated(address,address,bytes32,uint256,uint256)"),
-        ethersLib.utils.hexZeroPad(userAddress, 32)
-      ]
-    };
+    // Call the new V9.2 factory view
+    const vaultList = await factoryContract.getVaultsByOwner(userAddress);
 
-    const logs = await provider.getLogs(filter);
-    const iface = new ethersLib.utils.Interface(factoryAbi);
+    if (!vaultList.length) {
+      manualAddStatus.textContent = "No vaults found for this wallet.";
+      return;
+    }
 
     let count = 0;
-
-    for (const log of logs) {
-      const parsed = iface.parseLog(log);
-      const vaultAddr = parsed.args.vault.toLowerCase();
-
-      saveLocalVaultAddress(vaultAddr);
+    for (const v of vaultList) {
+      const addr = v.toLowerCase();
+      saveLocalVaultAddress(addr);  // still dedupes, as before
       count++;
     }
 
-    manualAddStatus.textContent =
-      count > 0
-        ? `Restored ${count} vault(s).`
-        : "No vaults found for this wallet.";
-
+    manualAddStatus.textContent = `Restored ${count} vault(s).`;
     await loadLocalVaults();
 
   } catch (err) {
@@ -482,6 +471,7 @@ async function restoreAllVaults() {
     console.error("Restore error:", err);
   }
 }
+
 
 // CREATE VAULT
 createForm.addEventListener("submit", async (e) => {
