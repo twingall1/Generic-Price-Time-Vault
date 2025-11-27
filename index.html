@@ -427,6 +427,28 @@
       margin-right: 6px;
       margin-left: 2px;
     }
+    /* Instant pie tooltip */
+    .pie-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .pie-tooltip {
+      position: absolute;
+      background: #000000dd;
+      color: #fff;
+      padding: 3px 8px;
+      font-size: 11px;
+      border-radius: 4px;
+      white-space: nowrap;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -120%);
+      left: 50%;
+      top: 0;
+      opacity: 0;
+      transition: opacity 0.05s linear;
+    }
 
   </style>
 </head>
