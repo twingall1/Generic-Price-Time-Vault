@@ -229,7 +229,19 @@ async function connect() {
 
     const net = await provider.getNetwork();
     walletSpan.textContent = userAddress;
-    networkInfo.textContent = `Connected (chainId: ${net.chainId})`;
+        // NETWORK DISPLAY (normal for PulseChain mainnet)
+    if (net.chainId === 369) {
+      networkInfo.innerHTML = `
+        <span style="color:#6b7280;">Connected (chainId: 369)</span>
+      `;
+    } 
+    // WRONG NETWORK WARNING (red, inline, no extra space)
+    else {
+      networkInfo.innerHTML =
+        `<span style="color:#c62828; font-weight:700;">Connected (chainId: ${net.chainId}) &nbsp; ⚠ SWITCH TO PULSECHAIN!</span>`;
+    }
+    
+
 
     factoryContract = new ethersLib.Contract(FACTORY_ADDRESS, factoryAbi, signer);
 
