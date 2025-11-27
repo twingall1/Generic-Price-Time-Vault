@@ -952,21 +952,23 @@ function renderLocks() {
       </div>
     `;
   }).join("");
-// --- Attach instant pie tooltip handlers AFTER all cards are in DOM ---
-const cards = locksContainer.querySelectorAll(".vault-card");
+// --- Attach instant pie tooltip handlers AFTER DOM paint (fixes slow pie loading) ---
+requestAnimationFrame(() => {
+  const cards = locksContainer.querySelectorAll(".vault-card");
 
-cards.forEach(card => {
-  const pieWrapper = card.querySelector(".pie-wrapper");
-  const tooltip = card.querySelector(".pie-tooltip");
+  cards.forEach(card => {
+    const pieWrapper = card.querySelector(".pie-wrapper");
+    const tooltip = card.querySelector(".pie-tooltip");
 
-  if (pieWrapper && tooltip) {
-    pieWrapper.addEventListener("mouseenter", () => {
-      tooltip.style.opacity = "1";
-    });
-    pieWrapper.addEventListener("mouseleave", () => {
-      tooltip.style.opacity = "0";
-    });
-  }
+    if (pieWrapper && tooltip) {
+      pieWrapper.addEventListener("mouseenter", () => {
+        tooltip.style.opacity = "1";
+      });
+      pieWrapper.addEventListener("mouseleave", () => {
+        tooltip.style.opacity = "0";
+      });
+    }
+  });
 });
 
 }
