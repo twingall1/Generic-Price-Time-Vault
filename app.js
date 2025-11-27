@@ -221,13 +221,13 @@ async function switchToPulseChain() {
   }
 
   try {
-    // First attempt to switch networks
+    // Try switching directly
     await window.ethereum.request({
       method: "wallet_switchEthereumChain",
-      params: [{ chainId: "0x171" }]  // PulseChain = 369 decimal
+      params: [{ chainId: "0x171" }]
     });
   } catch (err) {
-    // If the chain is not added yet
+    // If missing, attempt to add
     if (err.code === 4902 || (err.message && err.message.includes("4902"))) {
       try {
         await window.ethereum.request({
@@ -246,12 +246,24 @@ async function switchToPulseChain() {
         });
       } catch (addErr) {
         alert("Unable to add PulseChain: " + addErr.message);
+        return;
       }
     } else {
-      alert("Network switch failed: " + err.message);
+      alert("Failed to switch: " + err.message);
+      return;
     }
   }
+
+  // --- NEW PART: connect automatically after switching ---  
+  try {
+    await window.ethereum.request({ method: "eth_requestAccounts" });
+    // Use your existing connect() logic to update the UI
+    await connect();
+  } catch (connErr) {
+    alert("Network switched, but wallet connection failed: " + connErr.message);
+  }
 }
+
 // --- End insertion ---
 
 // CONNECT
