@@ -917,8 +917,10 @@ function renderLocks() {
           <div class="vault-col-pie">
             <div class="small" style="text-align:center;">Price goal</div>
             <div class="price-goal-pie"
+                 title="${priceGoalPct.toFixed(2)}%"
                  style="background:conic-gradient(#22c55e ${priceGoalPct}%, #020617 0);">
             </div>
+
           </div>
 
           <!-- COL 4: time progress -->
@@ -1026,6 +1028,7 @@ async function updateVaultPrices() {
     const pie = card.querySelector(".price-goal-pie");
     if (pie) {
       pie.style.background = `conic-gradient(#22c55e ${pctGoal}%, #020617 ${pctGoal}%)`;
+      pie.setAttribute("title", `${pctGoal.toFixed(2)}%`);
     }
 
     // FEED details (col 5)
