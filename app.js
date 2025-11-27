@@ -213,6 +213,46 @@ themeToggleBtn.addEventListener("click", () => {
   localStorage.setItem("vault-theme", isLight ? "light" : "dark");
   themeToggleBtn.textContent = isLight ? "🌚 Night" : "🌞 Day";
 });
+// --- switch to pulsechain ---
+async function switchToPulseChain() {
+  if (!window.ethereum) {
+    alert("No wallet detected.");
+    return;
+  }
+
+  try {
+    // First attempt to switch networks
+    await window.ethereum.request({
+      method: "wallet_switchEthereumChain",
+      params: [{ chainId: "0x171" }]  // PulseChain = 369 decimal
+    });
+  } catch (err) {
+    // If the chain is not added yet
+    if (err.code === 4902 || (err.message && err.message.includes("4902"))) {
+      try {
+        await window.ethereum.request({
+          method: "wallet_addEthereumChain",
+          params: [{
+            chainId: "0x171",
+            chainName: "PulseChain",
+            rpcUrls: ["https://rpc.pulsechain.com"],
+            blockExplorerUrls: ["https://scan.pulsechain.com"],
+            nativeCurrency: {
+              name: "Pulse",
+              symbol: "PLS",
+              decimals: 18
+            }
+          }]
+        });
+      } catch (addErr) {
+        alert("Unable to add PulseChain: " + addErr.message);
+      }
+    } else {
+      alert("Network switch failed: " + err.message);
+    }
+  }
+}
+// --- End insertion ---
 
 // CONNECT
 async function connect() {
@@ -237,8 +277,17 @@ async function connect() {
     } 
     // WRONG NETWORK WARNING (red, inline, no extra space)
     else {
-      networkInfo.innerHTML =
-        `<span style="color:#c62828; font-weight:700;">Connected (chainId: ${net.chainId}) &nbsp; ⚠ SWITCH TO PULSECHAIN!</span>`;
+      networkInfo.innerHTML = `
+        <span style="color:#c62828; font-weight:700;">
+          Connected (chainId: ${net.chainId}) — WRONG NETWORK
+        </span>
+        <button onclick="switchToPulseChain()"
+                style="margin-left:8px;padding:4px 8px;
+                       background:#c62828;color:#fff;border-radius:6px;">
+          Switch to PulseChain
+        </button>
+      `;
+
     }
     
 
