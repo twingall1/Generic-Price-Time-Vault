@@ -694,8 +694,11 @@ async function loadLocalVaults() {
 
 function detectAssetLabel(lockTokenAddr, isNative) {
   if (isNative) return "PLS";
-  if (lockTokenAddr === ADDR.PDAI) return "pDAI";
-  if (lockTokenAddr === ADDR.HEX)  return "HEX";
+
+  const addr = lockTokenAddr.toLowerCase();
+  if (addr === ADDR.PDAI) return "pDAI";
+  if (addr === ADDR.HEX)  return "HEX";
+
   return "Unknown";
 }
 // -------------------------------
@@ -811,7 +814,7 @@ function renderLocks() {
         <div class="vault-header">
         
           <span class="vault-asset-label">
-            <img src="${TOKEN_ICONS[assetLabel] || ''}" class="token-mini">
+            ${TOKEN_ICONS[assetLabel] ? `<img src="${TOKEN_ICONS[assetLabel]}" class="token-mini">` : ""}
             ${assetLabel} VAULT
           </span>
           ${status}
