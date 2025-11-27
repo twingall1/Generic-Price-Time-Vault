@@ -628,6 +628,66 @@ createForm.addEventListener("submit", async (e) => {
 
 
 
+function enableDragAndDrop() {
+  const cards = document.querySelectorAll(".vault-card");
+
+  cards.forEach(card => {
+    // Start dragging
+    card.addEventListener("dragstart", (e) => {
+      card.classList.add("dragging");
+      e.dataTransfer.setData("text/plain", card.dataset.addr);
+      e.dataTransfer.effectAllowed = "move";
+    });
+
+    // End dragging
+    card.addEventListener("dragend", () => {
+      card.classList.remove("dragging");
+      document.querySelectorAll(".drag-over").forEach(el => el.classList.remove("drag-over"));
+    });
+
+    // Highlight target card
+    card.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      card.classList.add("drag-over");
+    });
+
+    card.addEventListener("dragleave", () => {
+      card.classList.remove("drag-over");
+    });
+
+    // Handle drop
+    card.addEventListener("drop", (e) => {
+      e.preventDefault();
+      card.classList.remove("drag-over");
+
+      const draggedAddr = e.dataTransfer.getData("text/plain");
+      const targetAddr = card.dataset.addr;
+
+      reorderVaults(draggedAddr, targetAddr);
+    });
+  });
+}
+
+function reorderVaults(draggedAddr, targetAddr) {
+  const list = getLocalVaults();
+  const dragged = draggedAddr.toLowerCase();
+  const target  = targetAddr.toLowerCase();
+
+  const fromIndex = list.findIndex(a => a.toLowerCase() === dragged);
+  const toIndex   = list.findIndex(a => a.toLowerCase() === target);
+
+  if (fromIndex < 0 || toIndex < 0) return;
+
+  // Move item inside array
+  const [moved] = list.splice(fromIndex, 1);
+  list.splice(toIndex, 0, moved);
+
+  // Save new order
+  localStorage.setItem(localKey(), JSON.stringify(list));
+
+  // Re-render locks in new order (smooth and clean)
+  loadLocalVaults();
+}
 
 
 
@@ -898,7 +958,10 @@ function renderLocks() {
 
     // Render card
     return `
-      <div class="card vault-card ${collapsedCls} ${canWithdraw ? 'vault-unlockable' : ''}" data-addr="${addrFull}">
+      <div class="card vault-card ${collapsedCls} ${canWithdraw ? 'vault-unlockable' : ''}"
+           data-addr="${addrFull}"
+           draggable="true">
+
 
         <!-- ROW 1: HEADER -->
         <div class="vault-header">
@@ -1048,7 +1111,7 @@ requestAnimationFrame(() => {
     }
   });
 });
-
+enableDragAndDrop();
 }
 // -----------------------------------------
 // TIME + PRICE REFRESH (no full card re-renders)
