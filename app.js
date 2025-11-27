@@ -115,6 +115,13 @@ const ASSETS = {
     backupFeedLabel: "PulseX V1 HEX/DAI"
   }
 };
+
+const TOKEN_ICONS = {
+  PLS: "https://tokens.app.pulsex.com/images/tokens/0xA1077a294dDE1B09bB078844df40758a5D0f9a27.png",
+  pDAI: "https://tokens.app.pulsex.com/images/tokens/0x6B175474E89094C44Da98b954EedeAC495271d0F.png",
+  HEX: "https://tokens.app.pulsex.com/images/tokens/0x57fde0a71132198BBeC939B98976993d8D89D225.png"
+};
+
 Object.keys(ASSETS).forEach(code => {
   ASSETS[code].pair = ASSETS[code].primaryPair;
 });
@@ -803,7 +810,10 @@ function renderLocks() {
         <!-- ROW 1: HEADER -->
         <div class="vault-header">
         
-          <span class="vault-asset-label">${assetLabel} VAULT</span>
+          <span class="vault-asset-label">
+            <img src="${TOKEN_ICONS[assetLabel] || ''}" class="token-mini">
+            ${assetLabel} VAULT
+          </span>
           ${status}
         
           <!-- Address box -->
@@ -816,8 +826,8 @@ function renderLocks() {
                    border:1px solid var(--input-border);
                    padding:3px 4px;
                    border-radius:6px;
-                   width: 400px;
-                   max-width:400px;
+                   width: 360px;
+                   max-width:360px;
                    overflow:hidden;
                    text-overflow:ellipsis;
                    white-space:nowrap;
