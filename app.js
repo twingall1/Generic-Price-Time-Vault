@@ -983,7 +983,7 @@ function renderLocks() {
         ? '<span class="tag status-warn">✖ WITHDRAWN ✖</span>'
         : canWithdraw
         ? '<span class="tag status-ok">✔ UNLOCKABLE ✔</span>'
-        : '<span class="tag status-bad">🔒 LOCKED 🔒</span>';
+        : '<span class="tag status-bad">🔒 __LOCKED__ 🔒</span>';
 
     // Price goal %
     let priceGoalPct = 0;
