@@ -665,6 +665,11 @@ function enableDragAndDrop() {
   cards.forEach(card => {
     // Start dragging
     card.addEventListener("dragstart", (e) => {
+      const rect = card.getBoundingClientRect();
+      card.style.width = rect.width + "px";
+      card.style.left = rect.left + "px";
+      card.style.top = rect.top + "px";
+
       card.classList.add("dragging");
       e.dataTransfer.setData("text/plain", card.dataset.addr);
       e.dataTransfer.effectAllowed = "move";
@@ -673,6 +678,10 @@ function enableDragAndDrop() {
     // End dragging
     card.addEventListener("dragend", () => {
       card.classList.remove("dragging");
+      card.style.width = "";
+      card.style.left = "";
+      card.style.top = "";
+
       document.querySelectorAll(".drag-over").forEach(el => el.classList.remove("drag-over"));
       document.querySelectorAll(".vault-placeholder").forEach(el => el.remove());
     });
