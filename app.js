@@ -727,6 +727,29 @@ createForm.addEventListener("submit", async (e) => {
 
 // ---------------------------------------------
 
+function moveVaultUp(addr) {
+  const list = getLocalVaults();
+  const idx = list.findIndex(a => a.toLowerCase() === addr.toLowerCase());
+  if (idx > 0) {
+    const temp = list[idx - 1];
+    list[idx - 1] = list[idx];
+    list[idx] = temp;
+    localStorage.setItem(localKey(), JSON.stringify(list));
+    loadLocalVaults();
+  }
+}
+
+function moveVaultDown(addr) {
+  const list = getLocalVaults();
+  const idx = list.findIndex(a => a.toLowerCase() === addr.toLowerCase());
+  if (idx < list.length - 1) {
+    const temp = list[idx + 1];
+    list[idx + 1] = list[idx];
+    list[idx] = temp;
+    localStorage.setItem(localKey(), JSON.stringify(list));
+    loadLocalVaults();
+  }
+}
 
 // LOAD LOCAL VAULTS
 async function loadLocalVaults() {
@@ -899,7 +922,8 @@ function renderLocks() {
 
   const nowTs = Math.floor(Date.now() / 1000);
 
-  locksContainer.innerHTML = locks.map(lock => {
+  locksContainer.innerHTML = locks.map((lock, index) => {
+
 
     if (lock.error) {
       return `
@@ -1038,6 +1062,11 @@ function renderLocks() {
           <!-- Min/Max buttons -->
           <button class="minimize-btn" onclick="minimizeVault('${addrFull}')">▲ Min</button>
           <button class="maximize-btn" onclick="maximizeVault('${addrFull}')">▼ Max</button>
+          <div class="reorder-buttons">
+            ${index > 0 ? `<div class="reorder-up" onclick="moveVaultUp('${addrFull}')">▲</div>` : ``}
+            ${index < locks.length - 1 ? `<div class="reorder-down" onclick="moveVaultDown('${addrFull}')">▼</div>` : ``}
+          </div>
+
         
         </div>
 
