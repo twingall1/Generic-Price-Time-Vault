@@ -711,9 +711,11 @@ createForm.addEventListener("submit", async (e) => {
       console.warn("No VaultCreated event found in tx logs?");
     } else {
       const lower = vaultAddr.toLowerCase();
-      saveLocalVaultAddress(lower);
-      createStatus.textContent = `Vault created: ${lower}`;
-      await loadLocalVaults();
+    saveLocalVaultAddress(lower);
+    createStatus.textContent = `Vault created: ${lower}`;
+    
+    // NEW: soft-load only this vault — no flash
+    softLoadSingleVault(lower);
     }
 
   } catch (err) {
@@ -763,6 +765,44 @@ function moveVaultDown(addr) {
     renderLocks();
     updateVaultPrices();
   }
+}
+async function refreshSingleVault(addr) {
+  const updated = await loadOneVault(addr);   // same logic as loadLocalVaults loop
+
+  // Update in-memory copy
+  const idx = locks.findIndex(l => l.address === addr.toLowerCase());
+  if (idx >= 0) locks[idx] = updated;
+
+  // Re-render just this card
+  const card = document.querySelector(`.vault-card[data-addr="${addr.toLowerCase()}"]`);
+  if (!card) return;
+
+  const container = document.createElement("div");
+  container.innerHTML = renderSingleVault(updated);
+  card.replaceWith(container.firstElementChild);
+
+  // Update prices, time bars, etc. instantly
+  updateVaultPrices();
+}
+
+// ----------------------------------------------
+// Soft-load a single vault (no screen flash)
+// ----------------------------------------------
+async function softLoadSingleVault(addr) {
+  const lock = await loadOneVault(addr);
+  if (!lock) return;
+
+  // Add to in-memory list
+  locks.push(lock);
+
+  // Render HTML for this one vault
+  const html = renderSingleVault(lock);
+
+  // Insert card at correct position based on localStorage order
+  insertVaultCardInOrder(addr, html);
+
+  // Refresh all price displays immediately
+  updateVaultPrices();
 }
 
 
@@ -1458,7 +1498,9 @@ async function withdrawVault(addr) {
     const vault = new ethersLib.Contract(addr, vaultAbi, signer);
     const tx = await vault.withdraw();
     await tx.wait();
-    await loadLocalVaults();
+    
+    // NEW: soft refresh only this card
+    refreshSingleVault(addr);
   } catch (err) {
     alert("Withdraw failed: " + (err && err.message ? err.message : String(err)));
     console.error("Withdraw error:", err);
