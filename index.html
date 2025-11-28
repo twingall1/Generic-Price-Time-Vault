@@ -481,6 +481,49 @@
       transition: transform 0.15s ease;
     }
 
+    .disconnect-icon {
+      width: 28px;
+      height: 28px;
+      background: var(--copy-bg);
+      border-radius: 6px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      cursor:pointer;
+      position:relative;
+      transition: background 0.15s;
+    }
+    
+    .disconnect-icon:hover {
+      background: var(--copy-bg-hover);
+    }
+    
+    .disconnect-icon svg {
+      width: 16px;
+      height: 16px;
+      fill: white;
+    }
+    
+    /* Tooltip */
+    .disconnect-tooltip {
+      position:absolute;
+      top:-28px;
+      left:50%;
+      transform:translateX(-50%);
+      background:#000000dd;
+      color:white;
+      padding:3px 8px;
+      font-size:11px;
+      border-radius:4px;
+      white-space:nowrap;
+      pointer-events:none;
+      opacity:0;
+      transition:opacity 0.05s linear;
+    }
+    
+    .disconnect-icon:hover .disconnect-tooltip {
+      opacity:1;
+    }
 
   </style>
 </head>
@@ -501,11 +544,23 @@
 
     <div class="header-right">
       <button id="themeToggle" class="theme-toggle">🌙 Night</button>
-      <div class="wallet-info">
+      <div class="wallet-info" style="display:flex; align-items:center; gap:6px;">
+        
         <button id="connectBtn">Connect Wallet</button>
+      
+        <!-- NEW: Disconnect icon button -->
+        <div id="disconnectBtn" class="disconnect-icon" style="display:none;">
+          <svg viewBox="0 0 24 24">
+            <path d="M10 17l1.41-1.41L7.83 12l3.58-3.59L10 7l-5 5 5 5zm4-12h6v14h-6v2h8V3h-8v2z"/>
+          </svg>
+          <div class="disconnect-tooltip">Disconnect</div>
+        </div>
+      
         <span id="walletAddress" class="mono"></span>
         <div class="small" id="networkInfo"></div>
+      
       </div>
+
     </div>
   </header>
 
