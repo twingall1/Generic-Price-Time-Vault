@@ -701,10 +701,6 @@ function enableDragAndDrop() {
   cards.forEach(card => {
     // Start dragging
     card.addEventListener("dragstart", (e) => {
-      const rect = card.getBoundingClientRect();
-      card.style.width = rect.width + "px";
-      card.style.left = rect.left + "px";
-      card.style.top = rect.top + "px";
 
       card.classList.add("dragging");
       e.dataTransfer.setData("text/plain", card.dataset.addr);
