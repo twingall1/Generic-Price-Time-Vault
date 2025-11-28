@@ -282,6 +282,9 @@ async function connect() {
     // NEW: update button state
     connectBtn.textContent = "Connected ✓";
     connectBtn.disabled = true;
+    
+    // ⭐ NEW: show disconnect icon
+    document.getElementById("disconnectBtn").style.display = "flex";
 
     const net = await provider.getNetwork();
     walletSpan.textContent = userAddress;
@@ -328,15 +331,39 @@ async function connect() {
   }
 }
 connectBtn.addEventListener("click", connect);
+document.getElementById("disconnectBtn").addEventListener("click", () => {
+
+  // Reset UI
+  walletSpan.textContent = "";
+  networkInfo.textContent = "";
+  
+  connectBtn.textContent = "Connect Wallet";
+  connectBtn.disabled = false;
+
+  // Hide disconnect icon
+  document.getElementById("disconnectBtn").style.display = "none";
+
+  // Reset internal state
+  userAddress = null;
+  signer = null;
+  provider = null;
+
+  // Clear vault UI
+  locksContainer.textContent = "Connect wallet to load.";
+});
+
 // ---------------------------------------------------
 // AUTO UI UPDATE ON NETWORK CHANGE (NO POPUPS)
 // ---------------------------------------------------
 if (window.ethereum) {
   window.ethereum.on("chainChanged", async (chainIdHex) => {
-
     const chainId = parseInt(chainIdHex, 16);
 
+    // Always show disconnect icon if a wallet is connected
+    document.getElementById("disconnectBtn").style.display = "flex";
+
     if (chainId === 369) {
+      // PulseChain correct
       networkInfo.innerHTML = `
         <span style="color:#6b7280;">Connected (chainId: 369)</span>
       `;
@@ -344,6 +371,7 @@ if (window.ethereum) {
       connectBtn.disabled = true;
 
     } else {
+      // Wrong network
       networkInfo.innerHTML = `
         <span style="color:#c62828; font-weight:700;">
           Connected (chainId: ${chainId}) — WRONG NETWORK
@@ -354,19 +382,22 @@ if (window.ethereum) {
           Switch to PulseChain
         </button>
       `;
+
       connectBtn.textContent = "Connected ✓";
       connectBtn.disabled = false;
     }
 
-    refreshGlobalPrice();  // update the feed instantly
+    // Update global feed instantly
+    refreshGlobalPrice();
 
-    // refresh wallet address label
+    // Update wallet address label
     const accounts = await window.ethereum.request({ method: "eth_accounts" });
     if (accounts.length) {
       walletSpan.textContent = accounts[0].toLowerCase();
     }
   });
 }
+
 
 
 // ---------------------------------------------------
