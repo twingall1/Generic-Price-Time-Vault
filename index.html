@@ -206,9 +206,6 @@
       gap: 14px;
     }
   
-    .vault-card {
-      transition: box-shadow 0.3s, border 0.3s;
-    }
     .vault-unlockable {
       box-shadow: 0 0 16px 3px rgba(0,200,120,0.35);
       border: 1px solid #00b870 !important;
@@ -460,6 +457,23 @@
     
     .vault-card.drag-over {
       border: 2px dashed var(--accent);
+    }
+    /* Smooth slide animations, and old rules */
+    .vault-card {
+      transition:
+        box-shadow 0.3s,
+        border 0.3s,
+        transform 0.15s ease,
+        opacity 0.15s ease;
+    }
+
+    
+    /* The placeholder that takes the dragged card's space */
+    .vault-placeholder {
+      height: 140px;   /* approximate card height */
+      border: 2px dashed var(--accent);
+      margin-bottom: 12px;
+      border-radius: 12px;
     }
 
   </style>
