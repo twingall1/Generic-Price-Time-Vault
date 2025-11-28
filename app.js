@@ -726,111 +726,6 @@ createForm.addEventListener("submit", async (e) => {
 
 
 // ---------------------------------------------
-// POINTER-BASED DRAG & DROP REORDERING
-// ---------------------------------------------
-
-let dragData = null;
-
-function startPointerDrag(e, card) {
-  const rect = card.getBoundingClientRect();
-  const offsetY = e.clientY - rect.top;
-  const offsetX = e.clientX - rect.left;
-
-  // Create floating ghost
-  const ghost = card.cloneNode(true);
-  ghost.classList.add("drag-ghost");
-  ghost.style.width = rect.width + "px";
-  document.body.appendChild(ghost);
-
-  dragData = {
-    card,
-    ghost,
-    placeholder: null,
-    startIndex: [...locksContainer.children].indexOf(card),
-    offsetX,
-    offsetY
-  };
-
-  card.style.opacity = "0.2";
-
-  // Create placeholder
-  const placeholder = document.createElement("div");
-  placeholder.className = "vault-placeholder";
-  card.insertAdjacentElement("beforebegin", placeholder);
-  dragData.placeholder = placeholder;
-
-  document.addEventListener("pointermove", dragPointerMove);
-  document.addEventListener("pointerup", stopPointerDrag);
-}
-
-function dragPointerMove(e) {
-  if (!dragData) return;
-
-  const { ghost, offsetX, offsetY, placeholder } = dragData;
-
-  // Position floating card
-  ghost.style.left = e.clientX - offsetX + "px";
-  ghost.style.top = e.clientY - offsetY + "px";
-
-  // Find closest card under pointer
-  const cards = [...locksContainer.querySelectorAll(".vault-card")].filter(c => c !== dragData.card);
-  const y = e.clientY;
-
-  let nearest = null;
-  let smallestDist = Infinity;
-
-  for (const c of cards) {
-    const rect = c.getBoundingClientRect();
-    const centerY = rect.top + rect.height / 2;
-    const dist = Math.abs(y - centerY);
-    if (dist < smallestDist) {
-      smallestDist = dist;
-      nearest = c;
-    }
-  }
-
-  if (!nearest) return;
-
-  const rect = nearest.getBoundingClientRect();
-  const shouldPlaceAfter = y > rect.top + rect.height / 2;
-
-  // Place placeholder relative to nearest card
-  if (shouldPlaceAfter) {
-    nearest.insertAdjacentElement("afterend", placeholder);
-  } else {
-    nearest.insertAdjacentElement("beforebegin", placeholder);
-  }
-}
-
-function stopPointerDrag() {
-  if (!dragData) return;
-
-  const { card, ghost, placeholder } = dragData;
-
-  // Insert the real card where placeholder is
-  placeholder.replaceWith(card);
-  card.style.opacity = "1";
-
-  // Remove ghost
-  ghost.remove();
-
-  // Compute new order from DOM
-  const newOrder = [...locksContainer.querySelectorAll(".vault-card")].map(
-    el => el.dataset.addr.toLowerCase()
-  );
-
-  // Persist order
-  localStorage.setItem(localKey(), JSON.stringify(newOrder));
-
-  dragData = null;
-
-  document.removeEventListener("pointermove", dragPointerMove);
-  document.removeEventListener("pointerup", stopPointerDrag);
-
-  // Fully re-render
-  loadLocalVaults();
-}
-
 
 
 // LOAD LOCAL VAULTS
@@ -1255,13 +1150,7 @@ requestAnimationFrame(() => {
       });
     }
 
-    // ---------------------
-    // POINTER DRAG START
-    // ---------------------
-    card.addEventListener("pointerdown", (e) => {
-      if (e.button !== 0) return;        // only left-click
-      startPointerDrag(e, card);         // call our drag engine
-    });
+
   });
 });
 
