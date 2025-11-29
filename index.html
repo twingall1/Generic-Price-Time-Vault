@@ -106,7 +106,7 @@
     }
 
     .tag {
-      padding: 3px 10px;
+      padding: 2px 8px;
       border-radius: 999px;
       font-size: 12px;
       font-weight: 600;
@@ -122,9 +122,20 @@
       border: 1px solid #d0d0d0;
     }
 
-    .status-bad { color: #c62828 !important; }
-    .status-ok { color: #1f7a34 !important; }
-    .status-warn { color: #d4a017 !important; }
+    .status-bad {   /* LOCKED (red) */
+      color: #c62828 !important;
+      padding: 9px 19px;
+    }
+    
+    .status-ok {    /* UNLOCKABLE (green) */
+      color: #1f7a34 !important;
+      padding: 3px 10px;
+    }
+    
+    .status-warn {  /* WITHDRAWN (gold) */
+      color: #d4a017 !important;
+      padding: 3px 14px;
+    }
 
     .mono {
       font-family: Courier, monospace;
@@ -191,18 +202,21 @@
 
     .disconnect-tooltip {
       position: absolute;
-      top: 50%;
-      left: calc(100% + 8px);
-      transform: translateY(-50%);
+      bottom: 100%;          /* place tooltip ABOVE the icon */
+      left: 50%;             /* horizontally centered */
+      transform: translateX(-50%) translateY(-6px); 
+      /* translateY(-6px) = tight vertical spacing */
+    
       background: #000000dd;
       color: white;
       padding: 3px 8px;
       font-size: 11px;
       border-radius: 4px;
+      white-space: nowrap;
+    
       pointer-events: none;
       opacity: 0;
       transition: opacity 0.05s linear;
-      white-space: nowrap;
     }
 
     .disconnect-icon:hover .disconnect-tooltip {
@@ -237,7 +251,7 @@
     }
 
     .label-wide {
-      padding-right: 7px;
+      padding-right: 4px;
       padding-left: 4px;
     }
 
