@@ -1176,22 +1176,22 @@ function renderSingleVault(lock) {
       <div class="vault-body">
         <div class="vault-col-main">
           <div class="col1-line">
-            target&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;💲:
+            target&nbsp;💲:
             &nbsp;<span class="col1-value-bold">1 ${assetLabel} ≥ $${formatLockPrice(thresholdFloat)}</span>
           </div>
         
           <div class="col1-line">
-            current&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;💲:
+            current&nbsp;💲:
             &nbsp;<span class="col1-value-bold">$${formatLockPrice(currentPriceFloat)}</span>
           </div>
         
           <div class="col1-line">
-            unlock&nbsp;⏱️:
+            time&nbsp;🔓:
             &nbsp;<span class="col1-value-bold">${formatTimestamp(lock.unlockTime)}</span>
           </div>
         
           <div class="col1-line">
-            locked&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🪙:
+            locked&nbsp;🪙:
             &nbsp;<span class="col1-value-bold">${balanceFloat.toFixed(4)} ${assetLabel}</span>
           </div>
         </div>
