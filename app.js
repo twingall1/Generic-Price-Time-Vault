@@ -435,7 +435,7 @@ async function refreshGlobalPrice() {
     const cfg = ASSETS[assetCode];
     if (!cfg) return;
 
-    pairAddressSpan.textContent = cfg.primaryPair;
+
 
     const primaryInfo = await computePairPriceAndLiquidity(
       cfg.primaryPair,
@@ -489,29 +489,36 @@ async function refreshGlobalPrice() {
     let html = "";
 
     html += `<div class="small"><b>Primary feed (1°):</b> ${cfg.primaryFeedLabel}<br>`;
+    // ADD PAIR ADDRESS LINE
+    html += `Pair: <span class="mono">${cfg.primaryPair}</span><br>`;
+    
+    // STATUS + PRICE + RESERVES
     if (!primaryInfo.ok) {
       html += `Status: <span class="status-bad">unavailable</span>`;
     } else {
       html += `Status: <span class="status-ok">ok</span><br>`;
-      html += `Price: 1 ${cfg.label} ≈ $${formatLockPrice(
-        primaryInfo.priceFloat
-      )}, &nbsp;USD-side reserves: $${formatReserveK(
-        primaryInfo.quoteResFloat
-      )}</div>`;
+      html += `Price: 1 ${cfg.label} ≈ $${formatLockPrice(primaryInfo.priceFloat)}, `;
+      html += `USD-side reserves: $${formatReserveK(primaryInfo.quoteResFloat)}`;
     }
+    html += `</div>`;
+
 
     if (cfg.backupPair) {
       html += `<div class="small" style="margin-top:8px;"><b>Backup feed (2°):</b> ${cfg.backupFeedLabel}<br>`;
+      // Add backup pair address
+      html += `Pair: <span class="mono">${cfg.backupPair}</span><br>`;
+      
+      // Status + pricing
       if (!backupInfo.ok) {
         html += `Status: <span class="status-bad">unavailable</span>`;
       } else {
         html += `Status: <span class="status-ok">ok</span><br>`;
-        html += `Price: 1 ${cfg.label} ≈ $${formatLockPrice(
-          backupInfo.priceFloat
-        )}, &nbsp;USD-side reserves: $${formatReserveK(
-          backupInfo.quoteResFloat
-        )}</div>`;
+        html += `Price: 1 ${cfg.label} ≈ $${formatLockPrice(backupInfo.priceFloat)}, `;
+        html += `USD-side reserves: $${formatReserveK(backupInfo.quoteResFloat)}`;
       }
+      
+      html += `</div>`;
+
     }
 
     html += `<div class="small" style="margin-top:8px;">`;
