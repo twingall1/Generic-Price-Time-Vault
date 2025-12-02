@@ -516,6 +516,105 @@
       color: #3b82f6;
       text-decoration: none;
     }
+    /* ===========================================
+       MOBILE-ONLY LAYOUT (≤ 700px)
+       DOES NOT AFFECT DESKTOP
+       =========================================== */
+    @media (max-width: 700px) {
+    
+      /* -----------------------------
+         1) Vault header on mobile
+         ----------------------------- */
+    
+      /* Let header items wrap naturally */
+      .vault-header {
+        align-items: flex-start;
+      }
+    
+      /* Put token label + status on their own first row */
+      .vault-header .vault-asset-label,
+      .vault-header .tag {
+        flex: 0 0 100%;
+      }
+    
+      /* Make address smaller and allow wrapping */
+      .vault-header input.mono[type="text"] {
+        flex: 0 0 55%;
+        max-width: 55%;
+        box-sizing: border-box;
+        white-space: normal;
+        overflow-wrap: anywhere;
+      }
+    
+      /* Keep the icon buttons on the same line to the right of address */
+      .vault-header .copy-icon-btn,
+      .vault-header .minmax-btn,
+      .vault-header .reorder-buttons {
+        margin-top: 4px;
+      }
+    
+      /* -----------------------------
+         2) Vault body layout on mobile
+         ----------------------------- */
+    
+      .vault-body {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+    
+      /* Main info full width */
+      .vault-col-main {
+        flex: 0 0 100%;
+      }
+    
+      /* Withdraw / Remove side by side, full width row */
+      .vault-col-buttons {
+        flex: 0 0 100%;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 8px;
+      }
+    
+      .vault-col-buttons button {
+        flex: 1 1 0;
+      }
+    
+      /* Pie (left) + Time (right) side by side */
+      .vault-col-pie,
+      .vault-col-time {
+        flex: 0 0 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+      }
+    
+      .time-progress-bar-bg {
+        width: 100%;
+      }
+    
+      /* Feeds full width at bottom */
+      .vault-col-feeds {
+        flex: 0 0 100%;
+      }
+    
+      /* -----------------------------
+         3) Tiny zoom-out for top 3 cards
+            (Create, Price Feed, About)
+         ----------------------------- */
+    
+      .col-1 > .card:nth-of-type(1),
+      .col-2 > .card:nth-of-type(1),
+      .col-3 > .card:nth-of-type(1) {
+        transform: scale(0.92);
+        transform-origin: top center;
+        width: 108%;
+      }
+    }
+
+    
   </style>
 </head>
 
