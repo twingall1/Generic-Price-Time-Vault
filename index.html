@@ -692,6 +692,46 @@
     
       .vault-col-feeds {
           width: 100% !important;
+
+        /* ============================================================
+         MOBILE VAULT HEADER FIX
+         ============================================================ */
+        /* ROW 1 */
+      .vault-header-toprow {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 10px;
+          width: 100%;
+      }
+    
+      /* ROW 2 */
+      .vault-header-bottomrow {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+          gap: 10px;
+          width: 100%;
+      }
+    
+      /* WRAPPED ICON SET */
+      .vault-header-icons {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 10px;
+          flex-shrink: 0;
+      }
+    
+      /* ADDRESS FIELD @ 40% WIDTH + WRAPPING */
+      .vault-header-bottomrow input[type="text"] {
+          width: 40% !important;
+          max-width: 40% !important;
+          white-space: normal !important;
+          overflow-wrap: anywhere !important;
+          text-overflow: unset !important;
+      }
       }
     }
 
