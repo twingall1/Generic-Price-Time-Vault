@@ -602,7 +602,23 @@
         flex: 0 0 100%;
       }
     }
+@media (min-width: 701px) {
 
+  /* vault-body is already inline-flex, so we just ensure
+     these two children do NOT take full width */
+  .vault-col-pie,
+  .vault-col-time {
+    flex: 0 0 auto !important;
+    width: auto !important;
+    max-width: none !important;
+  }
+
+  /* ensure time bar doesn't wrap under pie */
+  .vault-col-time {
+    white-space: normal !important;
+  }
+
+}
 
 
     
