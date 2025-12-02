@@ -53,6 +53,7 @@
       color: var(--text);
       margin: 0;
       padding: 16px;
+      overflow-x: hidden;
     }
 
     h1, h2 {
@@ -71,6 +72,7 @@
       border: 1px solid var(--border);
       box-shadow: 0 6px 16px rgba(0,0,0,0.25);
       transition: transform 0.2s ease, opacity 0.2s ease;
+      overflow-x: hidden;
     }
 
     body.light-theme .card {
@@ -175,9 +177,6 @@
       align-items:center;
       gap:8px;
     }
-    .theme-toggle {
-      margin-top:0 !important;
-    }
 
     .disconnect-icon {
       width: 28px;
@@ -202,18 +201,15 @@
 
     .disconnect-tooltip {
       position: absolute;
-      bottom: 100%;          /* place tooltip ABOVE the icon */
-      left: 50%;             /* horizontally centered */
-      transform: translateX(-50%) translateY(-6px); 
-      /* translateY(-6px) = tight vertical spacing */
-    
+      bottom: 100%;          
+      left: 50%;
+      transform: translateX(-50%) translateY(-6px);
       background: #000000dd;
       color: white;
       padding: 3px 8px;
       font-size: 11px;
       border-radius: 4px;
       white-space: nowrap;
-    
       pointer-events: none;
       opacity: 0;
       transition: opacity 0.05s linear;
@@ -223,9 +219,7 @@
       opacity: 1;
     }
 
-    /* ============================
-       Layout (3 columns)
-    ============================ */
+    /* 3-column layout (dashboard) */
     .three-col-grid {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
@@ -250,25 +244,14 @@
       white-space: nowrap;
     }
 
-    /* Vault title labels — per-token control (adjust width for prefect alignment of rhs buttons vertically) */ 
-    .label-PLS {
-      padding: 3px 8px;     /* customise these */
-      border-radius: 6px;
-    }
-    
-    .label-HEX {
+    /* Vault title labels */
+    .label-PLS,
+    .label-HEX,
+    .label-pDAI {
       padding: 3px 8px;
       border-radius: 6px;
     }
-    
-    .label-pDAI {
-      padding: 3px 4px;
-      border-radius: 6px;
-    }
 
-    /* ============================
-       Vault cards
-    ============================ */
     #locksContainer {
       display: flex;
       flex-direction: column;
@@ -287,8 +270,8 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      flex-wrap: wrap;      /* allow wrapping */
-      white-space: normal;  /* allow text to wrap if needed */
+      flex-wrap: wrap;
+      white-space: normal;
     }
 
     .vault-body {
@@ -399,8 +382,8 @@
 
     .copy-popup {
       position: absolute;
-      top: -4px;          /* very close above */
-      left: 18px;         /* just to the right */
+      top: -4px;
+      left: 18px;
       background: #4ade80;
       color: #000;
       padding: 2px 6px;
@@ -409,7 +392,6 @@
       white-space: nowrap;
       pointer-events: none;
     }
-
 
     .reorder-buttons {
       display:flex;
@@ -446,6 +428,7 @@
       vertical-align:middle;
       margin:0 6px;
     }
+
     .minmax-btn {
       background: var(--min-btn);
       color: #111827;
@@ -453,43 +436,36 @@
       padding: 3px 6px;
       border-radius: 6px;
     }
+
     .minmax-btn:hover {
       background: var(--min-btn-hover);
     }
-    body {
-      overflow-x: hidden;
-    }
-    
-    .card {
-      overflow-x: hidden;
-    }
 
-        /* Align logo + title block properly */
+    /* Align logo + title block properly */
     .header-left {
       display: flex;
-      align-items: center;       /* vertical alignment */
-      gap: 14px;                 /* spacing between logo and text */
+      align-items: center;
+      gap: 14px;
     }
     
-    /* Make the logo scale proportionally */
     .header-logo {
-      height: 68px;              /* adjust until it visually matches the title+subtitle block */
+      height: 68px;
       width: auto;
     }
     
-    /* Increase title size */
     .header-title-block > div:first-child {
-      font-size: 24px;           /* bigger title */
+      font-size: 24px;
       font-weight: 700;
       line-height: 1.2;
     }
     
-    /* Increase subtitle size + clean spacing */
     .header-title-block .header-subtitle {
-      font-size: 15px;           /* slightly larger subtitle */
+      font-size: 15px;
       line-height: 1.25;
-      margin-top: 3px;           /* small vertical spacing */
+      margin-top: 3px;
     }
+
+    /* Header tabs */
     .header-tabs {
       display: flex;
       align-items: center;
@@ -518,15 +494,34 @@
       border: 1px solid #3b82f6;
     }
 
+    /* User guide layout tweaks */
+    #view-userguide {
+      max-width: 800px;
+      margin: 0 auto;
+      margin-top: 16px;
+    }
 
+    #view-userguide h1 {
+      font-size: 26px;
+      margin-bottom: 10px;
+    }
 
+    #view-userguide h2 {
+      margin-top: 24px;
+      color: #93c5fd;
+      font-size: 20px;
+    }
+
+    #view-userguide a {
+      color: #3b82f6;
+      text-decoration: none;
+    }
   </style>
 </head>
 
 <body>
 
   <header class="header-row">
-  
     <div class="header-left">
       <img src="PulseChainLogoTransparent.png" alt="PLS" class="header-logo">
       <div class="header-title-block">
@@ -536,17 +531,13 @@
         </div>
       </div>
     </div>
-  
-    <!-- CENTER TABS -->
+
     <div class="header-tabs">
-      <a href="index.html" class="header-tab" id="tab-dashboard">Dashboard</a>
-      <a href="user-guide.html" class="header-tab" id="tab-guide">User Guide</a>
+      <a href="#" class="header-tab" id="tab-dashboard" onclick="showDashboard(); return false;">Dashboard</a>
+      <a href="#" class="header-tab" id="tab-guide" onclick="showUserGuide(); return false;">User Guide</a>
     </div>
 
-
     <div class="header-right">
-      
-
       <div class="wallet-info">
         <div class="wallet-top-row">
           <button id="themeToggle" class="theme-toggle">🌙 Night</button>
@@ -565,135 +556,241 @@
     </div>
   </header>
 
-  <div class="three-col-grid">
-    <!-- COLUMN 1 -->
-    <div class="col-1">
-      <div class="card">
-        <h2>Create New Lock</h2>
-        <form id="createForm">
-          <div class="form-row-h">
-            <label>Lock Token</label>
-            <select id="assetSelect">
-              <option value="PLS">PLS (native)</option>
-              <option value="PDAI">pDAI (token)</option>
-              <option value="HEX">HEX (token)</option>
-            </select>
+  <!-- DASHBOARD VIEW -->
+  <div id="view-dashboard">
+    <div class="three-col-grid">
+      <!-- COLUMN 1 -->
+      <div class="col-1">
+        <div class="card">
+          <h2>Create New Lock</h2>
+          <form id="createForm">
+            <div class="form-row-h">
+              <label>Lock Token</label>
+              <select id="assetSelect">
+                <option value="PLS">PLS (native)</option>
+                <option value="PDAI">pDAI (token)</option>
+                <option value="HEX">HEX (token)</option>
+              </select>
+            </div>
+
+            <div class="form-row-h">
+              <label>Target price ($)</label>
+              <input id="targetPrice" type="text" placeholder="0.0100" required />
+            </div>
+
+            <div class="form-row-h">
+              <label>Unlock Time</label>
+              <input id="unlockDateTime" type="datetime-local" required />
+              <button type="submit" id="createBtn" style="margin-left:12px;">Create Vault</button>
+            </div>
+
+            <div id="createStatus" class="small" style="margin-top:6px;"></div>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2>Add Vault Address Manually</h2>
+          <div class="small">
+            Paste any supported vault created by this factory.
           </div>
 
-          <div class="form-row-h">
-            <label>Target price ($)</label>
-            <input id="targetPrice" type="text" placeholder="0.0100" required />
+          <div style="display:flex;gap:8px;align-items:center;margin-top:6px;">
+            <input id="manualVaultInput" type="text" placeholder="0x..."
+                   style="flex:1;min-width:200px;" />
+            <button id="addVaultBtn">Add</button>
+
+            <button id="restoreVaultsBtn"
+              style="
+                background:#1e40af;
+                color:white;
+                padding:6px 12px;
+                border-radius:6px;
+                cursor:pointer;
+                font-size:13px;
+                white-space:nowrap;">
+              Restore All Vaults
+            </button>
           </div>
 
-          <div class="form-row-h">
-            <label>Unlock Time</label>
-            <input id="unlockDateTime" type="datetime-local" required />
-            <button type="submit" id="createBtn" style="margin-left:12px;">Create Vault</button>
-          </div>
-
-          <div id="createStatus" class="small" style="margin-top:6px;"></div>
-        </form>
+          <div id="manualAddStatus" class="small"></div>
+        </div>
       </div>
 
-      <div class="card">
-        <h2>Add Vault Address Manually</h2>
-        <div class="small">
-          Paste any supported vault created by this factory.
+      <!-- COLUMN 2 -->
+      <div class="col-2">
+        <div class="card">
+          <h2>Global Price Feed</h2>
+          <div class="small" style="margin-bottom:6px;">
+            Source: PulseX pools for the selected asset.<br>
+            Uses primary (<b>1°</b>) & backup (<b>2°</b>) feeds.<br>
+            Feeds chosen by USD-normalized liquidity.<br><br>
+          </div>
+          <div id="globalPrice"></div>
+          <div id="globalPriceRaw" class="small"></div>
         </div>
+      </div>
 
-        <div style="display:flex;gap:8px;align-items:center;margin-top:6px;">
-          <input id="manualVaultInput" type="text" placeholder="0x..."
-                 style="flex:1;min-width:200px;" />
-          <button id="addVaultBtn">Add</button>
-
-          <button id="restoreVaultsBtn"
-            style="
-              background:#1e40af;
-              color:white;
-              padding:6px 12px;
-              border-radius:6px;
-              cursor:pointer;
-              font-size:13px;
-              white-space:nowrap;">
-            Restore All Vaults
-          </button>
+      <!-- COLUMN 3 -->
+      <div class="col-3">
+        <div class="card">
+          <h2>About This App</h2>
+          <div class="small">
+            <ul style="margin:0;padding-left:18px;">
+              <li>Immutable vaults for PLS, pDAI, or HEX. Unlocking via USD price threshold, or via time (backup)</li>
+              <li>
+                Verified Factory contract:
+                <a href="https://otter.pulsechain.com/address/0xf6aDe1a6db5bD96aD782E7AA1F566D11166719F0/contract"
+                   target="_blank"
+                   style="color:#3b82f6;">
+                   see on Otter.pulsechain.com
+                </a>
+                <div style="margin-left:18px; margin-top:1px; font-size:12px; color:var(--subtext);">
+                  Factory address = 0xf6aDe1a6db5bD96aD782E7AA1F566D11166719F0
+                </div>
+              </li>
+              <li>
+                GitHub repository:
+                <a href="https://github.com/twingall1/Generic-Price-Time-Vault" 
+                   target="_blank" 
+                   style="color:#3b82f6;">
+                  github.com/twingall1/Generic-Price-Time-Vault
+                </a>
+              </li>
+              <li>Feeds from PulseX pools, primary and backup.</li>
+              <li>No admin keys; all logic on-chain.</li>
+              <li>Time unlock as unbrickable failsafe.</li>
+              <li>Factory registry enables vault restore.</li>
+              <li>Intended as Single-use vaults.</li>
+              <li>Rescue function for accidental 2nd deposits.</li>
+            </ul>
+            <div style="margin-top:6px; color:#facc15;">
+              ⚠ 0.5% fee on successful withdrawal.
+            </div>
+          </div>
         </div>
-
-        <div id="manualAddStatus" class="small"></div>
       </div>
     </div>
 
-    <!-- COLUMN 2 -->
-    <div class="col-2">
-      <div class="card">
-        <h2>Global Price Feed</h2>
-        <div class="small" style="margin-bottom:6px;">
-          Source: PulseX pools for the selected asset.<br>
-          Uses primary (<b>1°</b>) & backup (<b>2°</b>) feeds.<br>
-          Feeds chosen by USD-normalized liquidity.<br><br>
-        </div>
-        <div id="globalPrice"></div>
-        <div id="globalPriceRaw" class="small"></div>
-      </div>
-    </div>
-
-    <!-- COLUMN 3 -->
-    <div class="col-3">
-      <div class="card">
-        <h2>About This App</h2>
-        <div class="small">
-          <ul style="margin:0;padding-left:18px;">
-            <li>Immutable vaults for PLS, pDAI, or HEX. Unlocking via USD price threshold, or via time (backup)</li>
-            <li>
-              Verified Factory contract:
-              <a href="https://otter.pulsechain.com/address/0xf6aDe1a6db5bD96aD782E7AA1F566D11166719F0/contract"
-                 target="_blank"
-                 style="color:#3b82f6;">
-                 see on Otter.pulsechain.com
-              </a>
-              <div style="margin-left:18px; margin-top:1px; font-size:12px; color:var(--subtext);">
-                Factory address = 0xf6aDe1a6db5bD96aD782E7AA1F566D11166719F0
-              </div>
-            </li>
-            <li>
-              GitHub repository:
-              <a href="https://github.com/twingall1/Generic-Price-Time-Vault" 
-                 target="_blank" 
-                 style="color:#3b82f6;">
-                github.com/twingall1/Generic-Price-Time-Vault
-              </a>
-            </li>
-            <li>Feeds from PulseX pools, primary and backup.</li>
-            <li>No admin keys; all logic on-chain.</li>
-            <li>Time unlock as unbrickable failsafe.</li>
-            <li>Factory registry enables vault restore.</li>
-            <li>Intended as Single-use vaults.</li>
-            <li>Rescue function for accidental 2nd deposits.</li>
-          </ul>
-          <div style="margin-top:6px; color:#facc15;">
-            ⚠ 0.5% fee on successful withdrawal.
-          </div>
-        </div>
-      </div>
+    <div class="card">
+      <h2>Your Locks</h2>
+      <div id="locksContainer" class="small">Connect wallet to load.</div>
     </div>
   </div>
 
-  <div class="card">
-    <h2>Your Locks</h2>
-    <div id="locksContainer" class="small">Connect wallet to load.</div>
+  <!-- USER GUIDE VIEW -->
+  <div id="view-userguide" style="display:none;">
+    <div class="card">
+      <h1>PulseLocker – User Guide</h1>
+      <p>
+        PulseLocker lets you create immutable single-use vaults for PLS, pDAI, or HEX.  
+        Each vault unlocks when <strong>either</strong> a target USD price is met or a backup
+        <strong>time unlock</strong> arrives. Everything is fully on-chain with no admin keys.
+        The contract is fully verified, immutable, and on-chain, so no one — including the creator — can alter, pause, or access your vault.
+      </p>
+
+      <h2>1) Choose Asset Type</h2>
+      <p>
+        Start by selecting which token you want to lock:
+      </p>
+      <ul>
+        <li><strong>PLS</strong> (native)</li>
+        <li><strong>pDAI</strong></li>
+        <li><strong>HEX</strong></li>
+      </ul>
+      <p>
+        Each asset has its own PulseX primary and backup price feeds, chosen automatically by USD-normalized liquidity.
+      </p>
+
+      <h2>2) Set Your Target USD Price</h2>
+      <p>
+        Enter the price (in USD) that must be reached for the vault to unlock via the price condition.
+        <br>
+        Example: <code>0.0045</code> means “unlock when 1 HEX ≥ $0.0045”.
+      </p>
+
+      <h2>3) Set a Time Unlock (Backup)</h2>
+      <p>
+        Choose a date and time in the future.  
+        This ensures the vault <em>always</em> unlocks eventually even if price conditions fail or feeds are unavailable.
+        We use two feeds for redundancy: if one pool has low liquidity or stale data, the vault can fall back to the other.
+        When checking price, the vault automatically picks whichever feed has the larger USD-side liquidity, since that pool gives the most reliable price at that moment.
+      </p>
+
+      <h2>4) Create the Vault</h2>
+      <p>
+        Connect your PulseChain wallet and click <strong>Create Vault</strong>.  
+        This deploys a brand-new immutable vault contract that only you own.
+      </p>
+
+      <h2>5) Deposit Tokens</h2>
+      <p>
+        After creation, simply send PLS / pDAI / HEX to the vault address whenever you want.  
+        There is no deadline — deposit at your leisure.
+      </p>
+
+      <h2>6) Unlock Conditions</h2>
+      <p>Your vault becomes withdrawable when:</p>
+      <ul>
+        <li><strong>The target USD price is met</strong>, OR</li>
+        <li><strong>The time unlock is reached</strong></li>
+      </ul>
+
+      <h2>7) Withdrawing</h2>
+      <p>
+        Once unlocked, click <strong>Withdraw</strong>.
+        <br>A 0.5% fee is taken automatically (on successful withdrawals only).
+        <br><strong>After withdrawal, the vault can never lock tokens again.</strong>
+      </p>
+
+      <h2>8) Accidentally Sent More Funds?</h2>
+      <p>
+        After you withdraw, the vault is considered “finished”.  
+        If you accidentally send new tokens to it, they will never be price-locked.
+        <br><br>
+        But the UI will show a <strong>Rescue</strong> button, allowing you to retrieve them immediately.
+      </p>
+
+      <h2>9) Single-Use Design</h2>
+      <p>
+        Each vault is intentionally designed as a <strong>single-cycle</strong> discipline vault:
+      </p>
+      <ul>
+        <li>Create</li>
+        <li>Deposit</li>
+        <li>Unlock</li>
+        <li>Withdraw once</li>
+        <li>Vault becomes inactive except for rescue</li>
+      </ul>
+
+      <h2>Return to App</h2>
+      <p>
+        <a href="#" onclick="showDashboard(); return false;">Back to PulseLocker</a>
+      </p>
+    </div>
   </div>
 
   <script src="https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script src="app.js"></script>
-  <script>
-    const path = window.location.pathname;
-  
-    if (path.includes("user-guide")) {
-      document.getElementById("tab-guide").classList.add("active-header-tab");
-    } else {
-      document.getElementById("tab-dashboard").classList.add("active-header-tab");
-    }
-  </script>
 
+  <script>
+    function showDashboard() {
+      document.getElementById("view-dashboard").style.display = "block";
+      document.getElementById("view-userguide").style.display = "none";
+
+      document.getElementById("tab-dashboard").classList.add("active-header-tab");
+      document.getElementById("tab-guide").classList.remove("active-header-tab");
+    }
+
+    function showUserGuide() {
+      document.getElementById("view-dashboard").style.display = "none";
+      document.getElementById("view-userguide").style.display = "block";
+
+      document.getElementById("tab-dashboard").classList.remove("active-header-tab");
+      document.getElementById("tab-guide").classList.add("active-header-tab");
+    }
+
+    // Default view on load
+    showDashboard();
+  </script>
 </body>
 </html>
