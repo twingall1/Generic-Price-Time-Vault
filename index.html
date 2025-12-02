@@ -517,6 +517,53 @@
       text-decoration: none;
     }
     /* ============================================================
+   DESKTOP RESTORATION FOR VAULT HEADER
+   (Fixes your desktop layout after adding row wrappers)
+   ============================================================ */
+
+    @media (min-width: 701px) {
+    
+      /* keep vault-header as one horizontal bar */
+      .vault-header {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 10px;
+          width: 100%;
+      }
+    
+      /* both rows behave as inline groups */
+      .vault-header-toprow,
+      .vault-header-bottomrow {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          gap: 10px;
+          margin: 0;
+          padding: 0;
+          width: auto;            /* CRITICAL: prevents full-width expansion */
+          flex-shrink: 0;
+      }
+    
+      /* address returns to original fixed desktop size */
+      .vault-header-bottomrow input[type="text"] {
+          width: 360px !important;
+          max-width: 360px !important;
+          white-space: nowrap !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+      }
+    
+      /* icons appear inline to the right */
+      .vault-header-icons {
+          display: flex;
+          flex-direction: row;
+          gap: 10px;
+          flex-shrink: 0;
+      }
+    }
+
+    /* ============================================================
        MOBILE IMPROVEMENTS FOR VAULT CARDS & CARD-SCALING
        ============================================================ */
     
