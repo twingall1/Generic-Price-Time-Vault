@@ -491,10 +491,45 @@
       margin-top: 3px;           /* small vertical spacing */
     }
 
+    .mini-tabs {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      gap: 28px;
+      margin-top: 6px;   /* Tiny spacing */
+      margin-bottom: 6px;
+    }
+  
+    .mini-tab {
+      font-size: 15px;
+      font-weight: 600;
+      color: #9ca3af;
+      text-decoration: none;
+      padding: 3px 6px; /* very small footprint */
+      border-radius: 6px;
+      transition: 0.15s ease;
+    }
+  
+    .mini-tab:hover {
+      color: #60a5fa; /* soft blue */
+    }
+  
+    .active-mini-tab {
+      color: #ffffff;
+      background: #1e3a8a;
+      border: 1px solid #3b82f6;
+    }
+
+
   </style>
 </head>
 
 <body>
+  <div class="mini-tabs">
+    <a href="index.html" class="mini-tab" id="tab-dashboard">Dashboard</a>
+    <a href="user-guide.html" class="mini-tab" id="tab-guide">User Guide</a>
+  </div>
+
   <header class="header-row">
     <div class="header-left">
       <img src="PulseChainLogoTransparent.png" alt="PLS" class="header-logo">
@@ -647,5 +682,14 @@
 
   <script src="https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js"></script>
   <script src="app.js"></script>
+  <script>
+    const path = window.location.pathname;
+
+    if (path.includes("user-guide")) {
+      document.getElementById("tab-guide").classList.add("active-mini-tab");
+    } else {
+      document.getElementById("tab-dashboard").classList.add("active-mini-tab");
+    }
+  </script>  
 </body>
 </html>
