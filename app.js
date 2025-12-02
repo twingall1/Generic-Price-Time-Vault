@@ -333,6 +333,18 @@ async function connect() {
     console.error(err);
   }
 }
+// ---------------------------------------------------
+// AUTO-RECONNECT on page load (if wallet already authorized)
+// ---------------------------------------------------
+if (window.ethereum) {
+  window.ethereum.request({ method: "eth_accounts" })
+    .then((accounts) => {
+      if (accounts.length > 0) {
+        connect();   // User already approved this site
+      }
+    })
+    .catch((err) => console.error("Auto-connect error:", err));
+}
 
 connectBtn.addEventListener("click", connect);
 
