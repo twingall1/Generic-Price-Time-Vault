@@ -516,6 +516,167 @@
       color: #3b82f6;
       text-decoration: none;
     }
+    /* ============================================================
+       MOBILE IMPROVEMENTS FOR VAULT CARDS & NON-VAULT ZOOM
+       ============================================================ */
+    
+    @media (max-width: 700px) {
+    
+      /* ------------------------------------------------------------
+         0. GLOBAL ZOOM FOR NON-VAULT CARDS ONLY (5–7%)
+         ------------------------------------------------------------ */
+    
+      /* We wrap non-vault cards using their existing container.
+         Vault cards are .vault-card, so this excludes them. */
+    
+      .page-inner > div:not(#yourLocksSection) {
+          transform: scale(0.93);
+          transform-origin: top center;
+      }
+    
+      /* Prevent horizontal scrollbar from zoom scaling */
+      html, body {
+          overflow-x: hidden;
+      }
+    
+    
+      /* ============================================================
+         VAULT CARDS MOBILE LAYOUT
+         ============================================================ */
+    
+      .vault-card {
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+      }
+    
+    
+      /* ------------------------------------------------------------
+         1. HEADER — address 40%, buttons on right
+         ------------------------------------------------------------ */
+    
+      .vault-header {
+          display: flex;
+          flex-direction: row;
+          align-items: center;
+          flex-wrap: nowrap;
+          justify-content: space-between;
+          gap: 6px;
+      }
+    
+      /* shrink the address field */
+      .vault-header input[type="text"] {
+          width: 40% !important;
+          max-width: 40% !important;
+          box-sizing: border-box;
+          font-size: 13px;
+          padding: 6px;
+          white-space: normal;     /* allow wrapping */
+          overflow-wrap: anywhere; /* break long address */
+      }
+    
+      /* row of icons on the right */
+      .vault-header .copy-btn,
+      .vault-header .min-btn,
+      .vault-header .sort-btn {
+          margin-left: 6px;
+          flex-shrink: 0;
+      }
+    
+    
+      /* ------------------------------------------------------------
+         2. BODY BLOCK BASE LAYOUT
+         ------------------------------------------------------------ */
+    
+      .vault-body {
+          display: flex !important;
+          flex-direction: column !important;
+          gap: 18px;
+      }
+    
+      /* main info full width */
+      .vault-col-main {
+          width: 100% !important;
+      }
+    
+    
+      /* ------------------------------------------------------------
+         3. WITHDRAW / REMOVE SIDE-BY-SIDE
+         ------------------------------------------------------------ */
+    
+      .vault-col-buttons {
+          display: flex !important;
+          flex-direction: row !important;
+          justify-content: space-between;
+          gap: 10px;
+          width: 100%;
+      }
+    
+      .vault-col-buttons button {
+          flex: 1 1 0;
+          width: 100%;
+          padding: 10px 0;
+          font-size: 15px;
+      }
+    
+    
+      /* ------------------------------------------------------------
+         4. PIE CHART + TIME BAR SIDE-BY-SIDE
+         ------------------------------------------------------------ */
+    
+      /* Wrap pie + time bar into a 2-column layout */
+      .vault-mobile-row {
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+          gap: 14px;
+      }
+    
+      /* Left: pie */
+      .vault-col-pie {
+          width: 50% !important;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+      }
+    
+      /* Ensure title 'Price goal' is preserved & centered */
+      .vault-col-pie > .col-title {
+          margin-bottom: 6px;
+      }
+    
+      /* Right: time bar */
+      .vault-col-time {
+          width: 50% !important;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          text-align: center;
+      }
+    
+      /* Title 'Time progress' respected */
+      .vault-col-time > .col-title {
+          margin-bottom: 6px;
+      }
+    
+      /* make the time progress bar full width inside its half */
+      .time-progress-bar-container {
+          width: 100%;
+      }
+    
+    
+      /* ------------------------------------------------------------
+         5. FEED INFO FULL WIDTH AT BOTTOM
+         ------------------------------------------------------------ */
+    
+      .vault-col-feeds {
+          width: 100% !important;
+      }
+    }
+
   </style>
 </head>
 
