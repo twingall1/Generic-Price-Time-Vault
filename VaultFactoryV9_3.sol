@@ -29,7 +29,7 @@ contract VaultFactoryV9_3 {
     uint8 public constant PDAI_DEC  = 18;
     uint8 public constant HEX_DEC   = 8;
 
-    // PulseX pairs
+    // PulseX feed pairs
     address public constant PLS_DAI_V1_PAIR =
         0xE56043671df55dE5CDf8459710433C10324DE0aE; // WPLS/DAI V1
 
