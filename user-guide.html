@@ -34,34 +34,34 @@
       border-radius:12px;
       box-shadow:0 6px 16px rgba(0,0,0,0.25);
     }
-    .mini-tabs {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    gap: 28px;
-    margin-top: 6px;   /* Tiny spacing */
-    margin-bottom: 6px;
-  }
+    .header-tabs {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      flex: 1;
+    }
+    
+    .header-tab {
+      font-size: 16px;
+      font-weight: 600;
+      color: #9ca3af;
+      text-decoration: none;
+      padding: 4px 10px;
+      border-radius: 6px;
+      transition: 0.15s ease;
+    }
+    
+    .header-tab:hover {
+      color: #60a5fa;
+    }
+    
+    .active-header-tab {
+      color: white;
+      background: #1e3a8a;
+      border: 1px solid #3b82f6;
+    }
 
-  .mini-tab {
-    font-size: 15px;
-    font-weight: 600;
-    color: #9ca3af;
-    text-decoration: none;
-    padding: 3px 6px; /* very small footprint */
-    border-radius: 6px;
-    transition: 0.15s ease;
-  }
-
-  .mini-tab:hover {
-    color: #60a5fa; /* soft blue */
-  }
-
-  .active-mini-tab {
-    color: #ffffff;
-    background: #1e3a8a;
-    border: 1px solid #3b82f6;
-  }
   </style>
 </head>
 
@@ -76,7 +76,8 @@
     <p>
       PulseLocker lets you create immutable single-use vaults for PLS, pDAI, or HEX.  
       Each vault unlocks when <strong>either</strong> a target USD price is met or a backup
-      <strong>time unlock</strong> arrives. Everything is fully on-chain with no admin keys.
+      <strong>time unlock</strong> arrives. Everything is fully on-chain with no admin keys. 
+      The contract is fully verified, immutable, and on-chain, so no one — including the creator — can alter, pause, or access your vault
     </p>
 
     <h2>1) Choose Asset Type</h2>
@@ -102,7 +103,9 @@
     <h2>3) Set a Time Unlock (Backup)</h2>
     <p>
       Choose a date and time in the future.  
-      This ensures the vault *always* unlocks eventually even if price conditions fail or feeds are unavailable.
+      This ensures the vault *always* unlocks eventually even if price conditions fail or feeds are unavailable. 
+      We use two feeds for redundancy: if one pool has low liquidity or stale data, the vault can fall back to the other. 
+      When checking price, the vault automatically picks whichever feed has the larger USD-side liquidity, since that pool gives the most reliable price at that moment.
     </p>
 
     <h2>4) Create the Vault</h2>
@@ -159,12 +162,13 @@
   </div>
   <script>
     const path = window.location.pathname;
-
+  
     if (path.includes("user-guide")) {
-      document.getElementById("tab-guide").classList.add("active-mini-tab");
+      document.getElementById("tab-guide").classList.add("active-header-tab");
     } else {
-      document.getElementById("tab-dashboard").classList.add("active-mini-tab");
+      document.getElementById("tab-dashboard").classList.add("active-header-tab");
     }
   </script>
+
 </body>
 </html>
