@@ -781,6 +781,40 @@
       }
       }
     }
+        /* ============================================================
+       DESKTOP RESTORATIONS (APPLY > 700px ONLY)
+       ============================================================ */
+    @media (min-width: 701px) {
+    
+        /* 1. Restore the original 360px wide address box */
+        .vault-header input[type="text"] {
+            width: 360px !important;
+            max-width: 360px !important;
+            white-space: nowrap !important;
+            text-overflow: ellipsis !important;
+            overflow: hidden !important;
+        }
+    
+        /* 2. Put pie chart and time progress side-by-side on desktop */
+        .vault-mobile-row {
+            display: flex !important;
+            flex-direction: row !important;
+            justify-content: flex-start !important;
+            align-items: center !important;
+            gap: 20px !important;
+            width: 100% !important;
+        }
+    
+        .vault-col-pie {
+            width: auto !important;       /* pie on left */
+            max-width: 220px !important;  /* consistent size */
+        }
+    
+        .vault-col-time {
+            width: auto !important;       /* bar on right */
+            flex: 1 !important;           /* take remaining space */
+        }
+    }
 
 
   </style>
