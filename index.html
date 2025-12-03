@@ -829,6 +829,45 @@
     .vault-card.collapsed .vault-body {
       display: none !important;
     }
+    @media (max-width: 700px) {
+
+  /* MOBILE DASHBOARD ORDERING — FINAL, CLEAN, SAFE */
+
+  /* Flatten ONLY grid + col-1 so cards can be reordered */
+  .three-col-grid {
+    display: contents;
+  }
+
+  .col-1 {
+    display: contents;
+  }
+
+  /* 1. Create New Lock (first card in col-1) */
+  .col-1 .card:nth-of-type(1) {
+    order: 1;
+  }
+
+  /* 2. Your Locks (outside the grid) */
+  #locksContainerCard {
+    order: 2;
+  }
+
+  /* 3. About This App (col-3) */
+  .col-3 {
+    order: 3;
+  }
+
+  /* 4. Global Price Feed (col-2) */
+  .col-2 {
+    order: 4;
+  }
+
+  /* 5. Add Vault Address Manually (second card in col-1) */
+  .col-1 .card:nth-of-type(2) {
+    order: 99;
+  }
+}
+
   </style>
 </head>
 
