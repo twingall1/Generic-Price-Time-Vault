@@ -226,11 +226,10 @@
       gap: 16px;
     }
     
-    /* Swap Global Price Feed (col-2) with About This App (col-3) */
+    /* Desktop: Swap Global Price Feed (col-2) with About This App (col-3) */
     .col-2 { order: 3; }   /* Global Price Feed moves to right */
     .col-3 { order: 2; }   /* About This App moves to center */
 
-    
     @media (max-width: 1100px) {
       .three-col-grid {
         grid-template-columns: 1fr;
@@ -498,6 +497,7 @@
       background: #1e3a8a;
       border: 1px solid #3b82f6;
     }
+
     /* VIEW-ONLY label (replaces Withdraw for vaults you do not own) */
     .view-only-label {
       display: flex;
@@ -513,6 +513,21 @@
       font-size: 12px;
       box-sizing: border-box;
       white-space: nowrap;
+    }
+
+    /* Desktop pie/time row */
+    .vault-mobile-row {
+      display: flex;
+      flex-direction: row;
+      gap: 20px;
+      width: 100%;
+    }
+
+    .vault-mobile-row .vault-col-pie,
+    .vault-mobile-row .vault-col-time {
+      flex: 1 1 50%;
+      box-sizing: border-box;
+      min-width: 0;
     }
 
     /* User guide layout tweaks */
@@ -537,547 +552,279 @@
       color: #3b82f6;
       text-decoration: none;
     }
-    /* ----------------------------------------------------------
-   GLOBAL FIX: Keep PIE + TIME always side-by-side everywhere
-   ---------------------------------------------------------- */
-.vault-mobile-row {
-  display: flex !important;
-  flex-direction: row !important;
-  justify-content: flex-start;
-  align-items: flex-start;
-  gap: 20px;
-  width: 100%;
-  flex-wrap: nowrap !important;
-}
-
-.vault-mobile-row .vault-col-pie,
-.vault-mobile-row .vault-col-time {
-  flex: 1 1 50% !important;
-  max-width: 50% !important;
-  box-sizing: border-box;
-  min-width: 0;
-}
-
-/* Prevent inner content from forcing wrapping */
-.vault-col-pie,
-.vault-col-time {
-  white-space: normal;
-  overflow: hidden;
-}
-/* ----------------------------------------------------------
-   MOBILE FIX #1 — Shrink top 3 cards so they never overflow
-   ---------------------------------------------------------- */
-@media (max-width: 700px) {
-
-  /* Make the 3-column dashboard become a single column */
-  .three-col-grid {
-    grid-template-columns: 1fr !important;
-  }
-
-  /* Reduce card padding on mobile so they fit better */
-  .three-col-grid .card {
-    padding: 10px 12px !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    box-sizing: border-box;
-  }
-
-  /* Provide small side padding so cards don't touch screen edges */
-  .col-1, .col-2, .col-3 {
-    padding-left: 6px;
-    padding-right: 6px;
-  }
-
-  /* Prevent headings from pushing the card wider */
-  .three-col-grid h2 {
-    font-size: 16px !important;
-    line-height: 1.2 !important;
-  }
-
-  /* Prevent form-row labels from forcing overflow */
-  .form-row-h label {
-    min-width: 90px !important;
-    font-size: 13px !important;
-  }
-
-  /* Make the input/select widths flexible */
-  .form-row-h input,
-  .form-row-h select {
-    width: 100%;
-    max-width: 100%;
-  }
-}
-/* ----------------------------------------------------------
-   MOBILE FIX — Shrink Header (Logo + Titles + Buttons)
-   Prevent global overflow on small screens
-   ---------------------------------------------------------- */
-@media (max-width: 700px) {
-
-  /* Stack header vertically so content fits */
-  .header-row {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  /* Row containing logo + text */
-  .header-left {
-    flex-direction: row;
-    align-items: center;
-    gap: 10px;
-    width: 100%;
-  }
-
-  /* Slightly smaller logo */
-  .header-logo {
-    height: 48px !important;
-  }
-
-  /* Smaller title */
-  .header-title-block > div:first-child {
-    font-size: 17px !important;
-  }
-
-  /* Smaller subtitle */
-  .header-subtitle {
-    font-size: 12px !important;
-  }
-
-  /* Center tabs nicely */
-  .header-tabs {
-    width: 100%;
-    justify-content: flex-start;
-    gap: 14px;
-  }
-
-  /* Wallet-and-buttons block should wrap instead of forcing overflow */
-  .header-right {
-    width: 100%;
-  }
-
-  .wallet-top-row {
-    gap: 6px;
-    flex-wrap: wrap;
-  }
-
-  /* Shrink connect/disconnect and theme toggle */
-  #connectBtn,
-  #themeToggle {
-    padding: 4px 8px !important;
-    font-size: 12px !important;
-  }
-
-  /* Shrink disconnect icon */
-  .disconnect-icon {
-    width: 24px !important;
-    height: 24px !important;
-  }
-    /* Tabs slightly smaller */
-  .header-tab {
-    font-size: 14px !important;
-    padding: 3px 8px !important;
-  }
-
-  /* Reduce top-card padding */
-  .three-col-grid .card {
-    padding: 8px 10px !important;   /* was 10/12 */
-  }
-
-  /* Shrink card headers */
-  .card h2 {
-    font-size: 15px !important;     /* was ~16-18 */
-  }
-
-  /* Reduce form-row vertical footprint slightly */
-  .form-row-h {
-    gap: 8px !important;            /* was 12 */
-    margin-bottom: 10px !important; /* was 12 */
-  }
-
-  /* Slightly smaller inputs/selects */
-  .form-row-h input,
-  .form-row-h select {
-    font-size: 13px !important;
-    padding: 5px 6px !important;
-  }
-
-  /* Slightly smaller button text */
-  button {
-    font-size: 13px !important;
-    padding: 5px 10px !important;
-  }
-
-  /* Shrink “Add” and “Restore All Vaults” row */
-  #restoreVaultsBtn,
-  #addVaultBtn {
-    padding: 5px 10px !important;
-    font-size: 13px !important;
-  }
-}
-@media (max-width: 700px) {
-
-  /* Pull content closer to the edges on phones */
-  body {
-    padding-left: 8px !important;
-    padding-right: 8px !important;
-  }
-
-  /* Reduce extra padding around the top 3 cards */
-  .col-1, .col-2, .col-3 {
-    padding-left: 2px !important;
-    padding-right: 2px !important;
-  }
-}
-@media (max-width: 700px) {
-
-  /* --- Vault HEADER layout on mobile --- */
-
-  .vault-header {
-    flex-wrap: wrap;
-    align-items: flex-start;
-    row-gap: 4px;
-  }
-
-  /* Row 1: logo + "PLS VAULT" + status */
-  .vault-header .vault-asset-label,
-  .vault-header .tag {
-    flex: 0 0 auto;
-  }
-
-  /* Row 2: address box ~50% width + icons to the right */
-  .vault-header input.mono {
-    flex: 1 1 55%;
-    max-width: 55% !important;
-    font-size: 11px;
-  }
-
-  .vault-header .copy-icon-btn,
-  .vault-header .minmax-btn,
-  .vault-header .reorder-buttons {
-    flex: 0 0 auto;
-  }
-
-  .reorder-buttons {
-    flex-direction: row;
-    gap: 2px;
-    margin-left: 2px;
-  }
-
-  /* --- Vault BODY column behavior on mobile --- */
-
-  .vault-body {
-    /* keep inline-flex, but make children take full rows */
-    flex-wrap: wrap;
-    align-items: stretch;
-  }
-
-  .vault-col-main,
-  .vault-col-buttons,
-  .vault-mobile-row,
-  .vault-col-feeds {
-    flex: 1 1 100%;
-    max-width: 100%;
-  }
-
-  /* Row 3: target/current/time/locked lines – a bit tighter */
-  .vault-col-main .col1-line {
-    font-size: 12px;
-  }
-
-  /* Row 4: Withdraw + Remove side-by-side */
-  .vault-col-buttons {
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 8px;
-  }
-
-  .vault-col-buttons button {
-    flex: 1 1 48%;
-    white-space: nowrap;
-  }
-
-  /* Row 5: PIE + TIME – we already force side-by-side globally;
-     just ensure they fit nicely on small screens */
-  .vault-mobile-row {
-    gap: 12px;
-    margin-top: 8px;
-  }
-
-  .vault-mobile-row .vault-col-pie,
-  .vault-mobile-row .vault-col-time {
-    flex: 1 1 50%;
-    max-width: 50%;
-  }
-
-  .vault-col-time {
-    text-align: center;
-  }
-
-  /* Row 6: price feed text full width, slightly smaller */
-  .vault-col-feeds {
-    margin-top: 6px;
-  }
-
-  .vault-col-feeds .small,
-  .vault-col-feeds div {
-    font-size: 11px;
-  }
-}
-
-@media (max-width: 700px) {
-
-  /* Flatten dashboard into a vertical list */
-  #view-dashboard {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 12px;
-  }
-
-  .three-col-grid {
-    display: contents;
-  }
-
-  /* --- ORDER COLUMNS FIRST --- */
-
-  /* Create New Lock + Add Vault (col-1) appears first */
-  .col-1 {
-    order: 1;
-  }
-
-  /* Your Locks (outside grid) appears second */
-  #locksContainerCard {
-    order: 2;
-  }
-
-  /* About This App (col-3) appears third */
-  .col-3 {
-    order: 3;
-  }
-
-  /* Global Price Feed (col-2) appears fourth */
-  .col-2 {
-    order: 4;
-  }
-
-  /* --- NOW ORDER THE TWO CARDS INSIDE col-1 --- */
-
-  /* Create New Lock first */
-  .col-1 > .card:nth-of-type(1) {
-    order: 1;
-  }
-
-  /* Add Vault Manually last */
-  .col-1 > .card:nth-of-type(2) {
-    order: 5; /* bigger number = further down */
-  }
-    /* Convert dashboard into a single vertical flow */
-  #view-dashboard {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 12px;
-  }
-
-  /* Flatten the grid so columns participate in ordering */
-  .three-col-grid {
-    display: contents;
-  }
-
-  /* --- ORDER COLUMNS (top-level blocks) --- */
-
-  /* Column 1 (Create New Lock + Add Vault Manually) goes first */
-  .col-1 {
-    order: 1;
-  }
-
-  /* Your Locks goes second */
-  #locksContainerCard {
-    order: 2;
-  }
-
-  /* About This App goes third */
-  .col-3 {
-    order: 3;
-  }
-
-  /* Global Price Feed goes fourth */
-  .col-2 {
-    order: 4;
-  }
-
-  /* --- ORDER CARDS INSIDE col-1 --- */
-
-  /* Create New Lock first */
-  .col-1 > .card:nth-of-type(1) {
-    order: 1;
-  }
-
-  /* Add Vault Address Manually last (the very bottom) */
-  .col-1 > .card:nth-of-type(2) {
-    order: 99;   /* VERY HIGH = guaranteed last */
-  }
-}
-@media (max-width: 700px) {
-
-  /* Flatten grid into one column */
-  #view-dashboard {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 12px;
-  }
-
-  .three-col-grid {
-    display: contents; /* allow children to break out */
-  }
-
-  /* The key: break col-1 into separate children on mobile */
-  .col-1 { display: contents; }
-
-  /* Now each card becomes its own flex item: target them directly */
-
-  /* 1. Create New Lock */
-  .col-1 .card:nth-of-type(1) {
-    order: 1;
-  }
-
-  /* 2. Your Locks */
-  #locksContainerCard {
-    order: 2;
-  }
-
-  /* 3. About This App */
-  .col-3 {
-    order: 3;
-  }
-
-  /* 4. Global Price Feed */
-  .col-2 {
-    order: 4;
-  }
-
-  /* 5. Add Vault Address Manually — always last */
-  .col-1 .card:nth-of-type(2) {
-    order: 99;
-  }
-}
-@media (max-width: 700px) {
-
-  /* Reorder vault-body children on mobile */
-  .vault-body {
-    display: flex !important;
-    flex-direction: column !important;
-    gap: 12px !important;
-  }
-
-  /* Row 1 stays: vault-col-main */
-
-  /* Row 2 becomes pie + time + feeds (side by side) */
-  .vault-col-pie,
-  .vault-col-time,
-  .vault-col-feeds {
-    order: 2;
-    flex: 1 1 33%;
-    max-width: 33%;
-  }
-
-  .vault-col-feeds {
-    white-space: normal;
-    font-size: 11px;
-  }
-
-  .vault-mobile-row {
-    display: none !important; /* we no longer use the mobile-row wrapper */
-  }
-
-  /* Convert the three columns (pie/time/feeds) into a row */
-  .vault-body {
-    flex-wrap: wrap;
-  }
-  
-  /* Row 3 (buttons) pushed to the bottom */
-  .vault-col-buttons {
-    order: 3;
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 8px;
-  }
-
-  .vault-col-buttons button,
-  .vault-col-buttons .view-only-label {
-    flex: 1 1 48%;
-  }
-}
-@media (max-width: 700px) {
-
-  /* Put pie/time + feeds into a side-by-side row */
-  .vault-body {
-    display: flex !important;
-    flex-direction: column !important;
-  }
-
-  /* Make a flex row for pie/time + feeds */
-  .vault-pie-time-feeds-row {
-    display: flex;
-    flex-direction: row;
-    gap: 12px;
-    margin-top: 8px;
-    width: 100%;
-  }
-
-  .vault-pie-time-stack {
-    flex: 0 0 40%;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .vault-col-feeds {
-    flex: 1 1 60%;
-    font-size: 11px;
-    white-space: normal;
-  }
-
-}
-@media (max-width: 700px) {
-  
-  .vault-mobile-row { display: none !important; } /* hide unused wrapper */
-
-  .vault-col-pie,
-  .vault-col-time {
-    /* group these two virtually */
-    order: 2;
-  }
-
-  .vault-col-feeds {
-    order: 2;
-  }
-
-  .vault-col-buttons {
-    order: 3;
-  }
-
-  /* Apply the virtual wrapper effect */
-  .vault-col-pie,
-  .vault-col-time,
-  .vault-col-feeds {
-    display: block;
-  }
-
-}
-@media (max-width: 700px) {
-  .vault-col-buttons button,
-  .vault-col-buttons .view-only-label {
-    padding: 5px 8px !important;
-    font-size: 12px !important;
-  }
-}
-#view-dashboard,
-#view-userguide {
-  width: 100%;
-  display: block;
-}
 
-
+    /* Ensure views are true containers (fix guide/dashboard switching) */
+    #view-dashboard,
+    #view-userguide {
+      width: 100%;
+      display: block;
+    }
+
+    /* ===========================
+       MOBILE LAYOUT (<=700px)
+       =========================== */
+    @media (max-width: 700px) {
+
+      /* Body padding a bit tighter */
+      body {
+        padding-left: 8px !important;
+        padding-right: 8px !important;
+      }
+
+      /* Stack header neatly */
+      .header-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .header-left {
+        flex-direction: row;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+      }
+
+      .header-logo {
+        height: 48px !important;
+      }
+
+      .header-title-block > div:first-child {
+        font-size: 17px !important;
+      }
+
+      .header-subtitle {
+        font-size: 12px !important;
+      }
+
+      .header-tabs {
+        width: 100%;
+        justify-content: flex-start;
+        gap: 14px;
+      }
+
+      .header-tab {
+        font-size: 14px !important;
+        padding: 3px 8px !important;
+      }
+
+      .header-right {
+        width: 100%;
+      }
+
+      .wallet-top-row {
+        gap: 6px;
+        flex-wrap: wrap;
+      }
+
+      #connectBtn,
+      #themeToggle {
+        padding: 4px 8px !important;
+        font-size: 12px !important;
+      }
+
+      .disconnect-icon {
+        width: 24px !important;
+        height: 24px !important;
+      }
+
+      /* Flatten dashboard, reorder cards */
+      #view-dashboard {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px;
+      }
+
+      .three-col-grid {
+        display: contents;
+      }
+
+      /* Break col-1 so its cards can be ordered individually */
+      .col-1 {
+        display: contents;
+      }
+
+      /* MOBILE CARD ORDER:
+         1) Create New Lock
+         2) Your Locks
+         3) About This App
+         4) Global Price Feed
+         5) Add Vault Address Manually
+      */
+
+      /* 1. Create New Lock (first card in col-1) */
+      .col-1 .card:nth-of-type(1) {
+        order: 1;
+      }
+
+      /* 2. Your Locks card (outside grid) */
+      #locksContainerCard {
+        order: 2;
+      }
+
+      /* 3. About This App */
+      .col-3 {
+        order: 3;
+      }
+
+      /* 4. Global Price Feed */
+      .col-2 {
+        order: 4;
+      }
+
+      /* 5. Add Vault Address Manually (second card in col-1) */
+      .col-1 .card:nth-of-type(2) {
+        order: 99;
+      }
+
+      /* Top card sizing */
+      .three-col-grid .card {
+        padding: 8px 10px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box;
+      }
+
+      .col-1, .col-2, .col-3 {
+        padding-left: 2px !important;
+        padding-right: 2px !important;
+      }
+
+      .three-col-grid h2 {
+        font-size: 16px !important;
+        line-height: 1.2 !important;
+      }
+
+      .card h2 {
+        font-size: 15px !important;
+      }
+
+      .form-row-h {
+        gap: 8px !important;
+        margin-bottom: 10px !important;
+      }
+
+      .form-row-h label {
+        min-width: 90px !important;
+        font-size: 13px !important;
+      }
+
+      .form-row-h input,
+      .form-row-h select {
+        width: 100%;
+        max-width: 100%;
+        font-size: 13px !important;
+        padding: 5px 6px !important;
+      }
+
+      #restoreVaultsBtn,
+      #addVaultBtn {
+        padding: 5px 10px !important;
+        font-size: 13px !important;
+      }
+
+      button {
+        font-size: 13px !important;
+        padding: 5px 10px !important;
+      }
+
+      /* Vault header mobile layout */
+      .vault-header {
+        flex-wrap: wrap;
+        align-items: flex-start;
+        row-gap: 4px;
+      }
+
+      .vault-header .vault-asset-label,
+      .vault-header .tag {
+        flex: 0 0 auto;
+      }
+
+      .vault-header input.mono {
+        flex: 1 1 55%;
+        max-width: 55% !important;
+        font-size: 11px;
+      }
+
+      .vault-header .copy-icon-btn,
+      .vault-header .minmax-btn,
+      .vault-header .reorder-buttons {
+        flex: 0 0 auto;
+      }
+
+      .reorder-buttons {
+        flex-direction: row;
+        gap: 2px;
+        margin-left: 2px;
+      }
+
+      /* Vault body mobile layout:
+         Row 1: main (full width)
+         Row 2: left = pie+time (vertical), right = feeds
+         Row 3: buttons (bottom, side-by-side)
+      */
+      .vault-body {
+        display: flex !important;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        gap: 12px;
+      }
+
+      .vault-col-main {
+        flex: 0 0 100%;
+      }
+
+      .vault-col-main .col1-line {
+        font-size: 12px;
+      }
+
+      /* Left side: pie + time stacked vertically */
+      .vault-mobile-row {
+        order: 2;
+        flex: 0 0 40%;
+        display: flex !important;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .vault-mobile-row .vault-col-pie,
+      .vault-mobile-row .vault-col-time {
+        flex: 0 0 auto;
+        max-width: 100%;
+      }
+
+      .vault-col-time {
+        text-align: center;
+      }
+
+      /* Right side: feeds */
+      .vault-col-feeds {
+        order: 2;
+        flex: 0 0 60%;
+        font-size: 11px;
+        white-space: normal;
+        margin-top: 0;
+      }
+
+      /* Buttons at bottom */
+      .vault-col-buttons {
+        order: 3;
+        flex: 0 0 100%;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+      }
+
+      .vault-col-buttons button,
+      .vault-col-buttons .view-only-label {
+        flex: 1 1 48%;
+        padding: 5px 8px !important;
+        font-size: 12px !important;
+        white-space: nowrap;
+      }
+    }
 
   </style>
 </head>
@@ -1324,6 +1071,7 @@
         <li>Withdraw once</li>
         <li>Vault becomes inactive except for rescue</li>
       </ul>
+
       <h2>10) Managing Your Vaults</h2>
       <ul>
         <li><strong>Remove a vault</strong> – Click <em>Remove</em> to hide it from your UI (vault remains on-chain).</li>
@@ -1340,7 +1088,6 @@
           Back to PulseLocker App
         </a>
       </p>
-
 
     </div>
   </div>
@@ -1368,9 +1115,12 @@
     // Default view on load
     showDashboard();
   </script>
-   <script>
+
+  <script>
     document.addEventListener("DOMContentLoaded", () => {
-      setGpfTitleSuffix(""); // no suffix until connected
+      if (typeof setGpfTitleSuffix === "function") {
+        setGpfTitleSuffix(""); // no suffix until connected
+      }
     });
   </script>
  
