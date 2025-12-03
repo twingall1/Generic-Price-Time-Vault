@@ -825,7 +825,10 @@
         white-space: nowrap;
       }
     }
-
+    /* FIX: allow minimize to work on mobile (override flex !important) */
+    .vault-card.collapsed .vault-body {
+      display: none !important;
+    }
   </style>
 </head>
 
@@ -1097,20 +1100,30 @@
 
   <script>
     function showDashboard() {
-      document.getElementById("view-dashboard").style.display = "block";
-      document.getElementById("view-userguide").style.display = "none";
-
+      const dash  = document.getElementById("view-dashboard");
+      const guide = document.getElementById("view-userguide");
+    
+      // Force dashboard visible, guide hidden (even against !important CSS)
+      dash.style.setProperty("display", "block", "important");
+      guide.style.setProperty("display", "none", "important");
+    
       document.getElementById("tab-dashboard").classList.add("active-header-tab");
       document.getElementById("tab-guide").classList.remove("active-header-tab");
     }
 
-    function showUserGuide() {
-      document.getElementById("view-dashboard").style.display = "none";
-      document.getElementById("view-userguide").style.display = "block";
 
+    function showUserGuide() {
+      const dash  = document.getElementById("view-dashboard");
+      const guide = document.getElementById("view-userguide");
+    
+      // Force dashboard hidden, guide visible (even against !important CSS)
+      dash.style.setProperty("display", "none", "important");
+      guide.style.setProperty("display", "block", "important");
+    
       document.getElementById("tab-dashboard").classList.remove("active-header-tab");
       document.getElementById("tab-guide").classList.add("active-header-tab");
     }
+
 
     // Default view on load
     showDashboard();
