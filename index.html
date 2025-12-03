@@ -809,6 +809,42 @@
   }
 }
 
+@media (max-width: 700px) {
+
+  /* MOBILE REORDERING OF TOP CARDS */
+
+  /* 1. Create New Lock (first card) stays first */
+  .col-1 .card:nth-of-type(1) {
+    order: 1;
+  }
+
+  /* 2. Your Locks card (outside grid) comes second */
+  #locksContainerCard {
+    order: 2;
+  }
+
+  /* 3. About This App (col-3) should come third */
+  .col-3 {
+    order: 3;
+  }
+
+  /* 4. Global Price Feed (col-2) becomes fourth */
+  .col-2 {
+    order: 4;
+  }
+
+  /* 5. Add Vault Address Manually card (second card in col-1) becomes last */
+  .col-1 .card:nth-of-type(2) {
+    order: 5;
+  }
+
+  /* Ensure grid and following cards obey ordering */
+  .three-col-grid,
+  #view-dashboard {
+    display: flex;
+    flex-direction: column;
+  }
+}
 
   </style>
 </head>
@@ -965,7 +1001,7 @@
       </div>
     </div>
 
-    <div class="card">
+    <div class="card" id="locksContainerCard">
       <h2>Your Locks</h2>
       <div id="locksContainer" class="small">Connect wallet to load.</div>
     </div>
