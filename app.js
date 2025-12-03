@@ -1228,26 +1228,35 @@ function renderSingleVault(lock) {
 
         <div class="vault-col-buttons">
           ${
-            !withdrawnTag
-              ? `<button data-role="withdraw" onclick="withdrawVault('${addrFull}')" ${
-                  canWithdraw ? "" : "disabled"
-                }>Withdraw</button>`
+            lock.owner && lock.owner.toLowerCase() === userAddress
+              ? (
+                  !withdrawnTag
+                    ? `<button data-role="withdraw" onclick="withdrawVault('${addrFull}')" ${
+                        canWithdraw ? "" : "disabled"
+                      }>Withdraw</button>`
+                    : ``
+                )
+              : `<div class="view-only-label">VIEW ONLY</div>`
+          }
+        
+          ${
+            lock.owner && lock.owner.toLowerCase() === userAddress
+              ? (
+                  showRescue
+                    ? `<button data-role="rescue" onclick="rescueVault('${addrFull}')"
+                        style="background:#1d4ed8;color:white;">Rescue</button>`
+                    : `<button data-role="rescue" style="display:none;background:#1d4ed8;color:white;"
+                        onclick="rescueVault('${addrFull}')">Rescue</button>`
+                )
               : ``
           }
-
-          ${
-            showRescue
-              ? `<button data-role="rescue" onclick="rescueVault('${addrFull}')"
-                  style="background:#1d4ed8;color:white;">Rescue</button>`
-              : `<button data-role="rescue" style="display:none;background:#1d4ed8;color:white;"
-                  onclick="rescueVault('${addrFull}')">Rescue</button>`
-          }
-
+        
           <button data-role="remove" onclick="removeVault('${addrFull}')"
                   style="background:#b91c1c;">
             Remove
           </button>
         </div>
+
 
         <div class="vault-col-pie">
           <div class="small" style="text-align:center;">Price goal</div>
