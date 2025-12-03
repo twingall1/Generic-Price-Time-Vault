@@ -1186,34 +1186,42 @@
       }
     });
   </script>
-<script>
-function fixMobileDashboardOrder() {
-  if (window.innerWidth > 700) return;
-
-  const col1 = document.querySelector(".col-1");
-  const col2 = document.querySelector(".col-2"); // global feed
-  const col3 = document.querySelector(".col-3"); // about
-  const locks = document.getElementById("locksContainerCard");
-
-  // Create New Lock and Add Manually live within col-1
-  // We reorder col-1 itself, not the cards inside it.
+  <script>
+  function reorderMobileDashboard() {
+    if (window.innerWidth > 700) return; // desktop unchanged
   
-  if (col1)  col1.style.order  = 1;
-  if (locks) locks.style.order = 2;
-  if (col3)  col3.style.order  = 3;
-  if (col2)  col2.style.order  = 4;
+    const dashboard = document.querySelector('#view-dashboard');
+  
+    // CARDS (actual DOM elements)
+    const createCard = document.querySelector('.col-1 .card:nth-of-type(1)');
+    const addCard    = document.querySelector('.col-1 .card:nth-of-type(2)');
+    const aboutCard  = document.querySelector('.col-3');
+    const feedCard   = document.querySelector('.col-2');
+    const locksCard  = document.getElementById('locksContainerCard');
+  
+    // STOP if any missing (prevents errors)
+    if (!createCard || !addCard || !aboutCard || !feedCard || !locksCard) return;
+  
+    // REMOVE them from DOM (safe)
+    createCard.remove();
+    addCard.remove();
+    aboutCard.remove();
+    feedCard.remove();
+    locksCard.remove();
+  
+    // APPEND in correct final order
+    dashboard.appendChild(createCard);  // 1
+    dashboard.appendChild(locksCard);   // 2
+    dashboard.appendChild(aboutCard);   // 3
+    dashboard.appendChild(feedCard);    // 4
+    dashboard.appendChild(addCard);     // 5
+  }
+  
+  // Run once at load and once on resize
+  document.addEventListener("DOMContentLoaded", reorderMobileDashboard);
+  window.addEventListener("resize", reorderMobileDashboard);
+  </script>
 
-  // Now reorder the two children of col-1:
-  const createCard    = document.querySelector(".col-1 .card:nth-of-type(1)");
-  const addManualCard = document.querySelector(".col-1 .card:nth-of-type(2)");
-
-  if (createCard)    createCard.style.order    = 1;
-  if (addManualCard) addManualCard.style.order = 99;
-}
-
-document.addEventListener("DOMContentLoaded", fixMobileDashboardOrder);
-window.addEventListener("resize", fixMobileDashboardOrder);
-</script>
 
 </body>
 </html>
