@@ -1238,7 +1238,7 @@ function renderSingleVault(lock) {
                       }>Withdraw</button>`
                     : ``
                 )
-              : `<div class="view-only-label">VIEW ONLY</div>`
+              : `<div class="view-only-label">~View Only~</div>`
           }
         
           ${
