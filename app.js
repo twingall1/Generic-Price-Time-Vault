@@ -1264,7 +1264,7 @@ function renderSingleVault(lock) {
           <div class="small" style="text-align:center;">Price goal</div>
           <div class="pie-wrapper">
             <div class="price-goal-pie"
-                 style="background:conic-gradient(#22c55e ${thresholdPct}%, #020617 ${thresholdPct}%);">
+                 style="background:conic-gradient(#22c55e ${thresholdPct}%, #1f2937 ${thresholdPct}%);">
             </div>
             <div class="pie-tooltip">${thresholdPct.toFixed(2)}%</div>
           </div>
@@ -1401,7 +1401,7 @@ async function updateVaultPrices() {
 
     const pie = card.querySelector(".price-goal-pie");
     if (pie) {
-      pie.style.background = `conic-gradient(#22c55e ${pct}%, #020617 ${pct}%)`;
+      pie.style.background = `conic-gradient(#22c55e ${pct}%, #1f2937 ${pct}%)`;
     }
     const tooltip = card.querySelector(".pie-tooltip");
     if (tooltip) tooltip.textContent = `${pct.toFixed(2)}%`;
