@@ -811,7 +811,7 @@
 
 @media (max-width: 700px) {
 
-  /* Turn the dashboard into a simple vertical container on mobile */
+  /* Flatten dashboard into a vertical list */
   #view-dashboard {
     display: flex !important;
     flex-direction: column !important;
@@ -819,34 +819,44 @@
   }
 
   .three-col-grid {
-    display: contents;   /* flatten the grid on mobile */
+    display: contents;
   }
 
-  /* 1. Create New Lock (first card inside col-1) */
-  .col-1 .card:nth-of-type(1) {
+  /* --- ORDER COLUMNS FIRST --- */
+
+  /* Create New Lock + Add Vault (col-1) appears first */
+  .col-1 {
     order: 1;
   }
 
-  /* 2. Your Locks (the card OUTSIDE the grid) */
+  /* Your Locks (outside grid) appears second */
   #locksContainerCard {
     order: 2;
   }
 
-  /* 3. About This App (col-3) */
+  /* About This App (col-3) appears third */
   .col-3 {
     order: 3;
   }
 
-  /* 4. Global Price Feed (col-2) */
+  /* Global Price Feed (col-2) appears fourth */
   .col-2 {
     order: 4;
   }
 
-  /* 5. Add Vault Address Manually (second card inside col-1) */
-  .col-1 .card:nth-of-type(2) {
-    order: 5;
+  /* --- NOW ORDER THE TWO CARDS INSIDE col-1 --- */
+
+  /* Create New Lock first */
+  .col-1 > .card:nth-of-type(1) {
+    order: 1;
+  }
+
+  /* Add Vault Manually last */
+  .col-1 > .card:nth-of-type(2) {
+    order: 5; /* bigger number = further down */
   }
 }
+
 
 
   </style>
