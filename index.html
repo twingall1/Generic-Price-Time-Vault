@@ -510,7 +510,7 @@
       border-radius: 8px;
       border: 1px solid #b38c00;
       width: 100%;                 /* matches button width */
-      font-size: 14px;
+      font-size: 12px;
       box-sizing: border-box;
       white-space: nowrap;
     }
@@ -870,6 +870,51 @@
   /* Add Vault Manually last */
   .col-1 > .card:nth-of-type(2) {
     order: 5; /* bigger number = further down */
+  }
+    /* Convert dashboard into a single vertical flow */
+  #view-dashboard {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px;
+  }
+
+  /* Flatten the grid so columns participate in ordering */
+  .three-col-grid {
+    display: contents;
+  }
+
+  /* --- ORDER COLUMNS (top-level blocks) --- */
+
+  /* Column 1 (Create New Lock + Add Vault Manually) goes first */
+  .col-1 {
+    order: 1;
+  }
+
+  /* Your Locks goes second */
+  #locksContainerCard {
+    order: 2;
+  }
+
+  /* About This App goes third */
+  .col-3 {
+    order: 3;
+  }
+
+  /* Global Price Feed goes fourth */
+  .col-2 {
+    order: 4;
+  }
+
+  /* --- ORDER CARDS INSIDE col-1 --- */
+
+  /* Create New Lock first */
+  .col-1 > .card:nth-of-type(1) {
+    order: 1;
+  }
+
+  /* Add Vault Address Manually last (the very bottom) */
+  .col-1 > .card:nth-of-type(2) {
+    order: 99;   /* VERY HIGH = guaranteed last */
   }
 }
 
