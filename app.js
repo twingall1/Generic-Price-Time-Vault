@@ -1097,7 +1097,7 @@ function renderSingleVault(lock) {
   const status = withdrawnTag
     ? '<span class="tag status-warn">✖ WITHDRAWN ✖</span>'
     : canWithdraw
-    ? '<span class="tag status-ok">✔ UNLOCKABLE ✔</span>'
+    ? '<span class="tag status-ok">✔ UNLOCKED ✔</span>'
     : '<span class="tag status-bad">🔒 LOCKED 🔒</span>';
 
   const nowTs = Math.floor(Date.now() / 1000);
@@ -1486,7 +1486,7 @@ async function updateVaultPrices() {
           card.classList.remove("vault-unlockable");
         } else if (canWithdraw) {
           statusTag.className = "tag status-ok";
-          statusTag.textContent = "✔ UNLOCKABLE ✔";
+          statusTag.textContent = "✔ UNLOCKED ✔";
           card.classList.add("vault-unlockable");
         } else {
           statusTag.className = "tag status-bad";
