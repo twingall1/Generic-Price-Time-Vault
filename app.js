@@ -49,6 +49,11 @@ function setCollapsed(addr, collapsed) {
     collapsed ? "1" : "0"
   );
 }
+function setGpfTitleSuffix(text) {
+  const el = document.getElementById("gpfAsset");
+  if (!el) return;
+  el.textContent = text ? `: ${text}` : "";
+}
 
 // -------------------------------
 // CONFIG
@@ -291,7 +296,8 @@ async function connect() {
 
     const net = await provider.getNetwork();
     walletSpan.textContent = userAddress;
-
+    setGpfTitleSuffix(assetSelect.value);
+    
     if (net.chainId === 369) {
       networkInfo.innerHTML = `
         <span style="color:#6b7280;">Connected (chainId: 369)</span>
@@ -363,6 +369,7 @@ document.getElementById("disconnectBtn").addEventListener("click", () => {
 
   locks = [];
   locksContainer.textContent = "Connect wallet to load.";
+  setGpfTitleSuffix(""); 
 });
 
 // ---------------------------------------------------
@@ -570,7 +577,10 @@ async function refreshGlobalPrice() {
   }
 }
 
-assetSelect.addEventListener("change", refreshGlobalPrice);
+assetSelect.addEventListener("change", () => {
+  setGpfTitleSuffix(assetSelect.value);
+  refreshGlobalPrice();
+});
 
 async function computePairPriceAndLiquidity(
   pairAddr,
