@@ -921,6 +921,7 @@ async function loadOneVault(addr) {
 
     return {
       address: addr.toLowerCase(),
+      owner: owner.toLowerCase(), 
       assetLabel,
       lockToken: lockTokenLower,
       primaryQuoteToken: primaryQuoteToken.toLowerCase(),
@@ -1072,6 +1073,7 @@ function renderSingleVault(lock) {
 
   const assetLabel = lock.assetLabel;
   const addrFull = lock.address;
+  const isOwner = (lock.owner === userAddress);
   const collapsedCls = isCollapsed(addrFull) ? "collapsed" : "";
 
   const thresholdFloat = parseFloat(
@@ -1228,7 +1230,7 @@ function renderSingleVault(lock) {
 
         <div class="vault-col-buttons">
           ${
-            lock.owner && lock.owner.toLowerCase() === userAddress
+            isOwner
               ? (
                   !withdrawnTag
                     ? `<button data-role="withdraw" onclick="withdrawVault('${addrFull}')" ${
@@ -1240,7 +1242,7 @@ function renderSingleVault(lock) {
           }
         
           ${
-            lock.owner && lock.owner.toLowerCase() === userAddress
+            isOwner
               ? (
                   showRescue
                     ? `<button data-role="rescue" onclick="rescueVault('${addrFull}')"
