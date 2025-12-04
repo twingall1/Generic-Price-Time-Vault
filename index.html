@@ -560,6 +560,26 @@
       background: #1e3a8a;
       border: 1px solid #3b82f6;
     }
+    .telegram-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      margin-left: 10px;
+      text-decoration: none;
+    }
+    
+    .telegram-icon {
+      width: 26px;
+      height: 26px;
+      opacity: 0.85;
+      transition: opacity 0.15s, transform 0.15s ease;
+    }
+    
+    .telegram-icon:hover {
+      opacity: 1;
+      transform: scale(1.12);
+    }
 
     /* VIEW-ONLY label (non-interactive, same footprint as Withdraw) */
     .view-only-label {
@@ -915,6 +935,11 @@
     <div class="header-tabs">
       <a href="#" class="header-tab" id="tab-dashboard" onclick="showDashboard(); return false;">Dashboard</a>
       <a href="#" class="header-tab" id="tab-guide" onclick="showUserGuide(); return false;">User Guide</a>
+    
+      <!-- TELEGRAM BUTTON -->
+      <a href="https://t.me/pulselocker" target="_blank" class="telegram-btn">
+        <img src="telegram.png" alt="Telegram" class="telegram-icon">
+      </a>
     </div>
 
     <div class="header-right">
@@ -1152,12 +1177,19 @@
         <li><strong>Minimize / maximize</strong> – Collapse or expand a vault using the <em>Min / Max</em> button.</li>
       </ul>
       
-      <p style="margin-top: 24px;">
+      <div style="margin-top: 24px; display: flex; justify-content: flex-start; gap: 24px;">
+      
         <a href="#" onclick="showDashboard(); return false;"
            style="color:#3b82f6; text-decoration:none; font-weight:600;">
-          Back to PulseLocker App
+          ← Back to PulseLocker App
         </a>
-      </p>
+      
+        <a href="https://t.me/pulselocker" target="_blank"
+           style="color:#3b82f6; text-decoration:none; font-weight:600;">
+          Join the Telegram Community →
+        </a>
+
+</div>
 
     </div>
   </div>
