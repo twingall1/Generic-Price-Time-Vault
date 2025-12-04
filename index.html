@@ -28,7 +28,7 @@
       --copy-bg-hover: #1d4ed8;
       --min-btn: #facc15;
       --min-btn-hover: #fbbf24;
-      --vault-container-bg: #0f1428; /* slightly lighter than card-bg */
+      --vault-container-bg: #1a2540; /* slightly lighter than card-bg */
     }
 
     body.light-theme {
@@ -49,7 +49,7 @@
       --copy-bg-hover: #0059cc;
       --min-btn: #eab308;
       --min-btn-hover: #ca8a04;
-      --vault-container-bg: #f0f4ff; /* soft tint for day mode */
+      --vault-container-bg: #e3ecff; /* soft tint for day mode */
     }
 
     /* ===========================
@@ -144,18 +144,18 @@
       border: 1px solid #d0d0d0;
     }
     
-    /* Light theme fixes for bold status tag borders */
-    body.light-theme .status-bad {
+    /* Light theme bold borders ONLY inside vault cards */
+    body.light-theme .vault-card .status-bad {
       border: 2px solid #c62828 !important;
       background: #ffffffcc !important;
     }
     
-    body.light-theme .status-ok {
+    body.light-theme .vault-card .status-ok {
       border: 2px solid #1f7a34 !important;
       background: #ffffffcc !important;
     }
     
-    body.light-theme .status-warn {
+    body.light-theme .vault-card .status-warn {
       border: 2px solid #d4a017 !important;
       background: #ffffffcc !important;
     }
@@ -164,20 +164,29 @@
     .status-bad {   /* LOCKED (red) */
       color: #c62828 !important;
       padding: 3px 21px;
-      border: 2px solid #c62828 !important;
-      background: rgba(198, 40, 40, 0.15); /* subtle tint */
     }
     
     .status-ok {    /* UNLOCKED (green) */
       color: #1f7a34 !important;
       padding: 3px 19px;
-      border: 2px solid #1f7a34 !important;
-      background: rgba(31, 122, 52, 0.15);
     }
     
     .status-warn {  /* WITHDRAWN (gold) */
       color: #d4a017 !important;
       padding: 3px 12px;
+    }
+    /* Bold status borders ONLY inside vault cards */
+    .vault-card .status-bad {
+      border: 2px solid #c62828 !important;
+      background: rgba(198, 40, 40, 0.15);
+    }
+    
+    .vault-card .status-ok {
+      border: 2px solid #1f7a34 !important;
+      background: rgba(31, 122, 52, 0.15);
+    }
+    
+    .vault-card .status-warn {
       border: 2px solid #d4a017 !important;
       background: rgba(212, 160, 23, 0.15);
     }
