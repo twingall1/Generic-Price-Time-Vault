@@ -40,13 +40,14 @@ function formatReserveK(value) {
 async function safeCall(fn, attempts = 3) {
   for (let i = 0; i < attempts; i++) {
     try {
-      return await fn();           // success → return immediately (desktop case)
+      return await fn(false);   // false = primary provider
     } catch (err) {
       if (i === attempts - 1) {
-        throw err;                 // last attempt fails → throw
+        // try fallback provider
+        return await fn(true);
       }
       await new Promise(res =>
-        setTimeout(res, 80 * (i + 1))   // backoff only when needed (mobile)
+        setTimeout(res, 80 * (i + 1))
       );
     }
   }
@@ -67,6 +68,32 @@ function setGpfTitleSuffix(text) {
   const el = document.getElementById("gpfAsset");
   if (!el) return;
   el.textContent = text ? `: ${text}` : "";
+}
+/* =========================================================
+   READ-ONLY RPC FALLBACK PROVIDER (SAFE FOR DESKTOP & MOBILE)
+   ========================================================= */
+
+const fallbackProvider = new ethersLib.providers.FallbackProvider(
+  [
+    new ethersLib.providers.JsonRpcProvider("https://pulsechain.publicnode.com"),
+    new ethersLib.providers.JsonRpcProvider("https://rpc.pulsechain.com"),
+    new ethersLib.providers.JsonRpcProvider("https://rpc-pulsechain.g4mm4.io")
+  ],
+  1 // 1 node success = enough
+);
+
+/* =====================================================================
+   CONTRACT HELPERS (PRIMARY = WALLET PROVIDER | FALLBACK = PUBLIC RPC)
+   ===================================================================== */
+
+function getPrimaryContract(addr, abi) {
+  // Uses the wallet’s RPC → Signing + network identity stays intact.
+  return new ethersLib.Contract(addr, abi, provider || fallbackProvider);
+}
+
+function getFallbackContract(addr, abi) {
+  // Uses public RPC cluster → very stable for reads.
+  return new ethersLib.Contract(addr, abi, fallbackProvider);
 }
 
 // -------------------------------
@@ -609,14 +636,27 @@ async function computePairPriceAndLiquidity(
 ) {
   if (!pairAddr) return { ok: false };
   try {
-    const pair = new ethersLib.Contract(pairAddr, pairAbi, provider);
+    // using fallback rpcs
+    const pair = getPrimaryContract(pairAddr, pairAbi);
 
-    // More robust on mobile: retry getReserves/token0/token1 briefly if RPC hiccups
-    const [r0, r1] = await safeCall(() => pair.getReserves());
+    // using fallback rpcs... and More robust on mobile: retry getReserves/token0/token1 briefly if RPC hiccups
+    const [r0, r1] = await safeCall(useFallback =>
+      useFallback
+        ? getFallbackContract(pairAddr, pairAbi).getReserves()
+        : pair.getReserves()
+    );
     if (r0.eq(0) || r1.eq(0)) return { ok: false };
 
-    const token0 = (await safeCall(() => pair.token0())).toLowerCase();
-    const token1 = (await safeCall(() => pair.token1())).toLowerCase();
+    const token0 = (await safeCall(useFallback =>
+      useFallback
+        ? getFallbackContract(pairAddr, pairAbi).token0()
+        : pair.token0()
+    )).toLowerCase();
+    const token1 = (await safeCall(useFallback =>
+      useFallback
+        ? getFallbackContract(pairAddr, pairAbi).token1()
+        : pair.token1()
+    )).toLowerCase();
 
     let lockRes, quoteRes;
     if (token0 === lockToken && token1 === quoteToken) {
@@ -845,23 +885,88 @@ function detectAssetLabel(lockTokenAddr, isNative) {
 
 async function loadOneVault(addr) {
   try {
-    const vault = new ethersLib.Contract(addr, vaultAbi, provider);
+    const vault = getPrimaryContract(addr, vaultAbi);
 
     // Sequential + safeCall: more robust on flaky mobile RPC;
     // only runs when initially loading a vault (not every 5s).
-    const owner                   = await safeCall(() => vault.owner());
-    const lockToken               = await safeCall(() => vault.lockToken());
-    const isNative                = await safeCall(() => vault.isNative());
-    const threshold               = await safeCall(() => vault.priceThreshold());
-    const unlockTime              = await safeCall(() => vault.unlockTime());
-    const startTime               = await safeCall(() => vault.startTime());
-    const withdrawn               = await safeCall(() => vault.withdrawn());
-    const primaryQuoteToken       = await safeCall(() => vault.primaryQuoteToken());
-    const backupQuoteToken        = await safeCall(() => vault.backupQuoteToken());
-    const primaryPair             = await safeCall(() => vault.primaryPair());
-    const backupPair              = await safeCall(() => vault.backupPair());
-    const primaryLockTokenIsToken0 = await safeCall(() => vault.primaryLockTokenIsToken0());
-    const backupLockTokenIsToken0  = await safeCall(() => vault.backupLockTokenIsToken0());
+    const owner = await safeCall(useFallback =>
+      useFallback
+        ? getFallbackContract(addr, vaultAbi).owner()
+        : vault.owner()
+    );
+    
+    const lockToken = await safeCall(useFallback =>
+      useFallback
+        ? getFallbackContract(addr, vaultAbi).lockToken()
+        : vault.lockToken()
+    );
+    
+    const isNative = await safeCall(useFallback =>
+      useFallback
+        ? getFallbackContract(addr, vaultAbi).isNative()
+        : vault.isNative()
+    );
+    
+    const threshold = await safeCall(useFallback =>
+      useFallback
+        ? getFallbackContract(addr, vaultAbi).priceThreshold()
+        : vault.priceThreshold()
+    );
+    
+    const unlockTime = await safeCall(useFallback =>
+      useFallback
+        ? getFallbackContract(addr, vaultAbi).unlockTime()
+        : vault.unlockTime()
+    );
+    
+    const startTime = await safeCall(useFallback =>
+      useFallback
+        ? getFallbackContract(addr, vaultAbi).startTime()
+        : vault.startTime()
+    );
+    
+    const withdrawn = await safeCall(useFallback =>
+      useFallback
+        ? getFallbackContract(addr, vaultAbi).withdrawn()
+        : vault.withdrawn()
+    );
+    
+    const primaryQuoteToken = await safeCall(useFallback =>
+      useFallback
+        ? getFallbackContract(addr, vaultAbi).primaryQuoteToken()
+        : vault.primaryQuoteToken()
+    );
+    
+    const backupQuoteToken = await safeCall(useFallback =>
+      useFallback
+        ? getFallbackContract(addr, vaultAbi).backupQuoteToken()
+        : vault.backupQuoteToken()
+    );
+    
+    const primaryPair = await safeCall(useFallback =>
+      useFallback
+        ? getFallbackContract(addr, vaultAbi).primaryPair()
+        : vault.primaryPair()
+    );
+    
+    const backupPair = await safeCall(useFallback =>
+      useFallback
+        ? getFallbackContract(addr, vaultAbi).backupPair()
+        : vault.backupPair()
+    );
+    
+    const primaryLockTokenIsToken0 = await safeCall(useFallback =>
+      useFallback
+        ? getFallbackContract(addr, vaultAbi).primaryLockTokenIsToken0()
+        : vault.primaryLockTokenIsToken0()
+    );
+    
+    const backupLockTokenIsToken0 = await safeCall(useFallback =>
+      useFallback
+        ? getFallbackContract(addr, vaultAbi).backupLockTokenIsToken0()
+        : vault.backupLockTokenIsToken0()
+    );
+
 
 
     const lockTokenLower = lockToken.toLowerCase();
@@ -900,7 +1005,11 @@ async function loadOneVault(addr) {
     let priceValid = false;
 
     try {
-      const detail = await safeCall(() => vault.priceDetail());
+      const detail = await safeCall(useFallback =>
+        useFallback
+          ? getFallbackContract(addr, vaultAbi).priceDetail()
+          : vault.priceDetail()
+      );
       chosenPriceBN = detail[0];
       primaryValid = detail[1];
       primaryPriceBN = detail[2];
@@ -1377,8 +1486,13 @@ async function updateVaultPrices() {
     // 1) Price + feed update
     let detail;
     try {
-      const vault = new ethersLib.Contract(addr, vaultAbi, provider);
-      detail = await safeCall(() => vault.priceDetail());
+      const vault = getPrimaryContract(addr, vaultAbi);
+      
+      detail = await safeCall(useFallback =>
+        useFallback
+          ? getFallbackContract(addr, vaultAbi).priceDetail()
+          : vault.priceDetail()
+      );
     } catch {
       continue;
     }
