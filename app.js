@@ -1376,7 +1376,9 @@ function renderSingleVault(lock) {
           </button>
         </div>
 
-
+        <!-- NEW FOREIGN-RESCUE COLUMN -->
+        <div class="vault-col-rescue-foreign"></div>
+        
         <div class="vault-col-pie">
           <div class="small" style="text-align:center;">Price goal</div>
           <div class="pie-wrapper">
@@ -1590,6 +1592,66 @@ async function updateVaultPrices() {
           4
         )} ${lock.assetLabel}`;
       }
+      // --------------------------------------------
+      // FOREIGN TOKEN RESCUE DETECTION + UI UPDATE
+      // --------------------------------------------
+      
+      // Only owners can rescue
+      if (lock.owner === userAddress) {
+      
+          const foreignRescue = [];
+      
+          // Check HEX (if not the locked asset)
+          if (lock.assetLabel !== "HEX") {
+              try {
+                  const hexErc = new ethersLib.Contract(ADDR.HEX, erc20Abi, provider);
+                  const hexBal = await hexErc.balanceOf(addr);
+                  if (!hexBal.isZero()) {
+                      foreignRescue.push({ token: "HEX", addr: ADDR.HEX });
+                  }
+              } catch (e) { console.error("HEX balance check error:", e); }
+          }
+      
+          // Check pDAI (if not the locked asset)
+          if (lock.assetLabel !== "pDAI") {
+              try {
+                  const pdaiErc = new ethersLib.Contract(ADDR.PDAI, erc20Abi, provider);
+                  const pdaiBal = await pdaiErc.balanceOf(addr);
+                  if (!pdaiBal.isZero()) {
+                      foreignRescue.push({ token: "pDAI", addr: ADDR.PDAI });
+                  }
+              } catch (e) { console.error("pDAI balance check error:", e); }
+          }
+      
+          // Inject into column
+          const rescueCol = card.querySelector(".vault-col-rescue-foreign");
+          if (rescueCol) {
+              if (foreignRescue.length === 0) {
+                  rescueCol.style.display = "none";
+                  rescueCol.innerHTML = "";
+              } else {
+                  rescueCol.style.display = "flex";
+                  rescueCol.innerHTML = "";
+                  foreignRescue.forEach(fr => {
+                      const btn = document.createElement("button");
+                      btn.className = "vault-foreign-rescue-btn";
+                      btn.textContent = "Rescue " + fr.token;
+                      btn.onclick = async () => {
+                          try {
+                              const vaultC = new ethersLib.Contract(addr, vaultAbi, signer);
+                              const tx = await vaultC.rescue(fr.addr);
+                              await tx.wait();
+                              await refreshSingleVault(addr);
+                          } catch (err) {
+                              alert("Rescue failed: " + (err?.message || err));
+                          }
+                      };
+                      rescueCol.appendChild(btn);
+                  });
+              }
+          }
+      }
+      // --------------------------------------------
 
       // Update RESCUE, WITHDRAW, and status tag
       const withdrawnTag = lock.withdrawn;
