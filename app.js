@@ -1636,63 +1636,28 @@ async function updateVaultPrices() {
 // FOREIGN TOKEN RESCUE DETECTION + UI UPDATE
 // --------------------------------------------
 
-// Only owners can rescue
+// OWNER ONLY
 if (lock.owner === userAddress) {
 
     const foreignSpecific = [];  // HEX, pDAI
-    const foreignGeneral = [];   // all other ERC20s
+    const foreignGeneral = [];   // unknown tokens
 
-    //
-    // 1) ALWAYS CHECK SPECIFIC FOREIGN TOKENS FIRST
-    //
-    if (lock.assetLabel !== "HEX") {
-        const hexBal = await getErc20Balance(ADDR.HEX, addr);
-        if (!hexBal.isZero()) foreignSpecific.push({ token: "HEX", addr: ADDR.HEX });
-    }
+    // (specific checks here...)
 
-    if (lock.assetLabel !== "pDAI") {
-        const pdaiBal = await getErc20Balance(ADDR.PDAI, addr);
-        if (!pdaiBal.isZero()) foreignSpecific.push({ token: "pDAI", addr: ADDR.PDAI });
-    }
+    // (general detection here...)
 
-    //
-    // 2) DETECT ALL OTHER FOREIGN TOKENS (GENERAL RESCUE)
-    //
-    const tokenSet = await detectForeignTokenContracts(addr);
-
-    for (const token of tokenSet) {
-        const t = token.toLowerCase();
-
-        // skip locked token
-        if (t === lock.lockToken.toLowerCase()) continue;
-
-        // skip known specific tokens (HEX, pDAI)
-        if (t === ADDR.HEX) continue;
-        if (t === ADDR.PDAI) continue;
-
-        // check balance
-        const bal = await getErc20Balance(t, addr);
-        if (!bal.isZero()) {
-            foreignGeneral.push(t);  // unknown token with non-zero balance
-        }
-    }
-
-    //
-    // 3) INJECT BUTTONS INTO THE RESCUE COLUMN
-    //
     const rescueCol = card.querySelector(".vault-col-rescue-foreign");
 
     if (rescueCol) {
         rescueCol.innerHTML = "";
 
-        // If nothing to rescue → hide column entirely
         if (foreignSpecific.length === 0 && foreignGeneral.length === 0) {
             rescueCol.style.display = "none";
 
         } else {
             rescueCol.style.display = "flex";
 
-            // Specific buttons: HEX, pDAI
+            // Specific tokens (HEX, pDAI)
             foreignSpecific.forEach(fr => {
                 const btn = document.createElement("button");
                 btn.className = "vault-foreign-rescue-btn";
@@ -1710,14 +1675,14 @@ if (lock.owner === userAddress) {
                 rescueCol.appendChild(btn);
             });
 
-            // GENERAL RESCUE button (only one displayed at a time)
+            // General Rescue button for unknown tokens
             if (foreignGeneral.length > 0) {
                 const btn = document.createElement("button");
                 btn.className = "vault-foreign-rescue-btn";
                 btn.textContent = "Rescue Other";
                 btn.onclick = async () => {
                     try {
-                        const tokenAddr = foreignGeneral[0]; // first unknown token
+                        const tokenAddr = foreignGeneral[0];
                         const vaultC = new ethersLib.Contract(addr, vaultAbi, signer);
                         const tx = await vaultC.rescue(tokenAddr);
                         await tx.wait();
@@ -1730,8 +1695,17 @@ if (lock.owner === userAddress) {
             }
         }
     }
+
+// VIEW-ONLY → NO RESCUE BUTTONS
+} else {
+    const rescueCol = card.querySelector(".vault-col-rescue-foreign");
+    if (rescueCol) {
+        rescueCol.style.display = "none";
+        rescueCol.innerHTML = "";
+    }
 }
 // --------------------------------------------
+
 
 
       // Update RESCUE, WITHDRAW, and status tag
