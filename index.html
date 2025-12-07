@@ -647,11 +647,53 @@
     .time-progress-bar-bg {
       width: 180px !important;
     }
+    /* ======================================================
+       FOREIGN RESCUE COLUMN (Desktop)
+       ====================================================== */
+    .vault-col-rescue-foreign {
+      display: none; /* collapse when empty */
+    }
+    
+    @media (min-width: 700px) {
+      .vault-col-rescue-foreign {
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 11px;
+      }
+    
+      .vault-foreign-rescue-btn {
+        background: #1d4ed8;
+        color: white;
+        border-radius: 8px;
+        padding: 6px 10px;
+        font-size: 13px;
+        white-space: nowrap;
+      }
+    }
 
     /* ====================================================== =========================== 
        MOBILE LAYOUT (<=700px)
        ====================================================== ===========================  */
     @media (max-width: 700px) {
+      /* FOREIGN RESCUE COLUMN — Mobile Layout */
+      .vault-col-rescue-foreign {
+        display: none; /* collapsed unless needed */
+        order: 4;      /* appear right after .vault-col-buttons */
+        flex-direction: row;
+        justify-content: space-between;
+        gap: 8px;
+        width: 100%;
+      }
+    
+      .vault-foreign-rescue-btn {
+        flex: 1 1 48%;
+        padding: 5px 8px !important;
+        font-size: 12px !important;
+        background: #1d4ed8;
+        color: white;
+        border-radius: 8px;
+        white-space: nowrap;
+      }
 
       /* Body padding a bit tighter */
       body {
