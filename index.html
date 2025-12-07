@@ -1095,7 +1095,17 @@
         <strong>time unlock</strong> arrives.<br> Everything is fully on-chain with no admin keys.<br>
         The contract is fully verified, immutable, and on-chain, so no one — including the creator — can alter, pause, or access your vault.
       </p>
-
+      <h2>0) Connect Your Wallet</h2>
+      <p>
+          To begin, connect your Web3 wallet to PulseLocker using your browser’s
+          wallet extension (such as <strong>MetaMask</strong> or <strong>Rabbi</strong>). 
+          This allows the app to read your address and display any vaults you have created.
+      </p>
+      <p>
+          PulseLocker never takes custody of your keys, cannot move your funds,
+          and cannot change or access your vaults. Connecting your wallet simply
+          enables the app to interact with the smart contracts on your behalf.
+      </p>
       <h2>1) Choose Asset Type</h2>
       <p>
         Start by selecting which token you want to lock:
@@ -1147,30 +1157,43 @@
       <p>
         Once unlocked, click <strong>Withdraw</strong>.
         <br>A 0.5% fee is taken automatically (on successful withdrawals only).
-        <br><strong>After withdrawal, the vault can never lock tokens again.</strong>
+        <br><strong>After withdrawal, the vault will never lock tokens again,</strong> though still functions as an address.
       </p>
 
-      <h2>8) Accidentally Sent More Funds?</h2>
+      <!-- SEPARATOR ----------------------------------------------------------->
+      <hr style="margin: 32px 0;">
+  
+      <h2>Other Things to Know</h2>
       <p>
-        After you withdraw, the vault is considered “finished”.  
-        If you accidentally send new tokens to it, they will never be price-locked.
-        <br><br>
-        But the UI will show a <strong>Rescue</strong> button, allowing you to retrieve them immediately.
+        The following sections explain vault behaviour after withdrawal and how to manage vaults 
+        in the dashboard.
       </p>
-
-      <h2>9) Single-Use Design</h2>
+  
+      <!-- EXTRA INFO 1 -------------------------------------------------------->
+      <h3>Accidentally Sent More Funds?</h3>
       <p>
-        Each vault is intentionally designed as a <strong>single-cycle</strong> discipline vault:
+        After withdrawal, the vault is considered “finished”.  
+        If you later send tokens to it by mistake, they will not be price-locked.
+      </p>
+      <p>
+        The UI will show a <strong>Rescue</strong> button, allowing you to retrieve them immediately.
+      </p>
+  
+      <!-- EXTRA INFO 2 -------------------------------------------------------->
+      <h3>Single-Use Design</h3>
+      <p>
+        Each vault is intentionally a <strong>single-cycle</strong> discipline vault:
       </p>
       <ul>
-        <li>Create</li>
-        <li>Deposit</li>
-        <li>Unlock</li>
+        <li>Create vault</li>
+        <li>Deposit tokens</li>
+        <li>Unlock via time or price</li>
         <li>Withdraw once</li>
-        <li>Vault becomes inactive except for rescue</li>
+        <li>Vault becomes inactive (rescue only)</li>
       </ul>
-
-      <h2>10) Managing Your Vaults</h2>
+  
+      <!-- EXTRA INFO 3 -------------------------------------------------------->
+      <h3>Managing Your Vaults</h3>
       <ul>
         <li><strong>Remove a vault</strong> – Click <em>Remove</em> to hide it from your UI (vault remains on-chain).</li>
         <li><strong>Restore all vaults</strong> – Click <em>Restore All Vaults</em> to reload every vault created by the connected address.</li>
