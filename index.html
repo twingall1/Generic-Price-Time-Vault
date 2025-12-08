@@ -1062,107 +1062,52 @@
         display: block;
       }
     }
-/* ===========================================
-   FINAL MOBILE HEADER OVERRIDE (DO NOT MOVE)
-   Forces correct 3-row layout on mobile
-   =========================================== */
-@media (max-width: 700px) {
-
-    /* Force header into 3 vertical rows */
-    .header-row {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: flex-start !important;
-        width: 100% !important;
-        gap: 6px !important;
-    }
-
-    /* Row 1: LOGO + TITLE */
-    .header-left {
-        order: 1 !important;
-        width: 100% !important;
-        display: flex !important;
-        flex-direction: row !important;
-        align-items: center !important;
-        justify-content: flex-start !important;
-    }
-
-    /* Row 2: PAGE TABS (Dashboard, User Guide, Telegram) */
-    .header-tabs {
-        order: 2 !important;
-        width: 100% !important;
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        align-items: center !important;
-        justify-content: flex-start !important;
-        gap: 12px !important;
-        white-space: nowrap !important;
-    }
-
-    .header-tab {
-        font-size: 14px !important;
-        padding: 4px 10px !important;
-    }
-
-    .telegram-btn {
-        display: inline-flex !important;
-    }
-
-    /* Row 3: WALLET RIGHT SIDE */
-    .header-right {
-        order: 3 !important;
-        width: 100% !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: flex-end !important;
-    }
-}
 
   </style>
 </head>
 
 <body>
 
-  <header class="header-row">
-    <div class="header-left">
-      <img src="pulselocker-logo-websiteHeader.png" alt="PLS_LKR" class="header-logo">
-      <div class="header-title-block">
-        <div><b>PulseLocker</b></div>
-        <div class="header-subtitle small">
-          PLS / pDAI / HEX vaults: Unlock at target price or backup time
-        </div>
+<header class="header-row">
+  <div class="header-left">
+    <img src="pulselocker-logo-websiteHeader.png" alt="PLS_LKR" class="header-logo">
+    <div class="header-title-block">
+      <div><b>PulseLocker</b></div>
+      <div class="header-subtitle small">
+        PLS / pDAI / HEX vaults: Unlock at target price or backup time
       </div>
     </div>
-    
+  </div>
+
+  <!-- GROUPED TABS + TELEGRAM -->
+  <div class="header-tabs">
     <a href="#dashboard" class="header-tab" id="tab-dashboard">Dashboard</a>
     <a href="#userguide" class="header-tab" id="tab-guide">User Guide</a>
 
-    
-      <!-- TELEGRAM BUTTON -->
-      <a href="https://t.me/pulselocker" target="_blank" class="telegram-btn">
-        <img src="telegram.png" alt="Telegram" class="telegram-icon">
-      </a>
-    
+    <a href="https://t.me/pulselocker" target="_blank" class="telegram-btn">
+      <img src="telegram.png" alt="Telegram" class="telegram-icon">
+    </a>
+  </div>
 
-    <div class="header-right">
-      <div class="wallet-info">
-        <div class="wallet-top-row">
-          <button id="themeToggle" class="theme-toggle">🌙 Night</button>
-          <button id="connectBtn">Connect Wallet</button>
-          <div id="disconnectBtn" class="disconnect-icon" style="display:none;">
-            <svg viewBox="0 0 24 24">
-              <path d="M10 17l1.41-1.41L7.83 12l3.58-3.59L10 7l-5 5 5 5zm4-12h6v14h-6v2h8V3h-8v2z"/>
-            </svg>
-            <div class="disconnect-tooltip">Disconnect</div>
-          </div>
+  <div class="header-right">
+    <div class="wallet-info">
+      <div class="wallet-top-row">
+        <button id="themeToggle" class="theme-toggle">🌙 Night</button>
+        <button id="connectBtn">Connect Wallet</button>
+        <div id="disconnectBtn" class="disconnect-icon" style="display:none;">
+          <svg viewBox="0 0 24 24">
+            <path d="M10 17l1.41-1.41L7.83 12l3.58-3.59L10 7l-5 5 5 5zm4-12h6v14h-6v2h8V3h-8v2z"/>
+          </svg>
+          <div class="disconnect-tooltip">Disconnect</div>
         </div>
-
-        <span id="walletAddress" class="mono"></span>
-        <div class="small" id="networkInfo"></div>
       </div>
+
+      <span id="walletAddress" class="mono"></span>
+      <div class="small" id="networkInfo"></div>
     </div>
-  </header>
+  </div>
+</header>
+
 
   <!-- DASHBOARD VIEW -->
   <div id="view-dashboard">
