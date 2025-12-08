@@ -100,7 +100,7 @@ function getFallbackContract(addr, abi) {
 // CONFIG
 // -------------------------------
 const FACTORY_ADDRESS =
-  "0xfa2D526eC9B9024870147939Bcf69c01aff0531f".toLowerCase(); // :contentReference[oaicite:0]{index=0}
+  "0x1C6b16003c107d28CcC550Eb3613a262ADaf0416".toLowerCase(); // :contentReference[oaicite:0]{index=0}
 
 const ADDR = {
   DAI: "0xefD766cCb38EaF1dfd701853BFCe31359239F305".toLowerCase(),
