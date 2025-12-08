@@ -1062,6 +1062,62 @@
         display: block;
       }
     }
+/* ===========================================
+   FINAL MOBILE HEADER OVERRIDE (DO NOT MOVE)
+   Forces correct 3-row layout on mobile
+   =========================================== */
+@media (max-width: 700px) {
+
+    /* Force header into 3 vertical rows */
+    .header-row {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        width: 100% !important;
+        gap: 6px !important;
+    }
+
+    /* Row 1: LOGO + TITLE */
+    .header-left {
+        order: 1 !important;
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+    }
+
+    /* Row 2: PAGE TABS (Dashboard, User Guide, Telegram) */
+    .header-tabs {
+        order: 2 !important;
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: 12px !important;
+        white-space: nowrap !important;
+    }
+
+    .header-tab {
+        font-size: 14px !important;
+        padding: 4px 10px !important;
+    }
+
+    .telegram-btn {
+        display: inline-flex !important;
+    }
+
+    /* Row 3: WALLET RIGHT SIDE */
+    .header-right {
+        order: 3 !important;
+        width: 100% !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-end !important;
+    }
+}
 
   </style>
 </head>
