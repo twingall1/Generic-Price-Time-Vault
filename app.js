@@ -1963,3 +1963,15 @@ function formatCountdownNumber(diff) {
   if (!d && !h && !m) parts.push(s + "s");
   return parts.join(" ");
 }
+// ======================================================
+// Enable direct linking to User Guide (e.g. ?#userguide)
+// ======================================================
+window.addEventListener("load", () => {
+  const hash = window.location.hash.toLowerCase();
+  if (hash === "#userguide") {
+    // Simulate clicking the tab
+    const guideTab = document.getElementById("headerTabUserguide");
+    if (guideTab) guideTab.click();
+  }
+});
+
