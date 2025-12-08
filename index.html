@@ -61,10 +61,7 @@
       --min-btn-hover: #ca8a04;
       --vault-container-bg: #e3ecff; /* soft tint for day mode */
     }
-    .header-tabs {
-        flex-grow: 0 !important;
-        flex-shrink: 0 !important;
-    }
+
     /* ===========================
        GLOBAL ELEMENTS
        =========================== */
@@ -535,14 +532,16 @@
       margin-top: 3px;
     }
 
-    /* Header tabs */
     .header-tabs {
       display: flex;
+      flex-direction: row;
       align-items: center;
-      justify-content: center;
-      gap: 20px;
-      flex: 1;
+      justify-content: flex-start;
+      gap: 14px;
+      flex-wrap: nowrap;
+      flex: 0 0 auto;
     }
+
     
     .header-tab {
       font-size: 16px;
@@ -660,14 +659,7 @@
        HEADER LAYOUT FIX — Compact Tabs + Telegram
        ============================================ */
     
-    /* Header container: keep items together */
-    .header-tabs {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 12px; /* set clean spacing between dashboard / userguide */
-        margin-right: 12px;
-    }
+
     
     /* Tabs: compact width, no forced expansion */
     .header-tab {
@@ -749,15 +741,16 @@
         gap: 6px;
       }
       
-      /* But header-left + header-tabs should be inline */
-      .header-left, 
+
+      /* Mobile: tabs inline, but left stays on its own row */
       .header-tabs {
-        display: flex !important;
-        flex-direction: row !important;
-        align-items: center !important;
-        gap: 10px !important;
-        width: auto !important;
+          display: flex !important;
+          flex-direction: row !important;
+          align-items: center !important;
+          gap: 10px !important;
+          width: auto !important;
       }
+
 
 
       .header-left {
@@ -780,6 +773,7 @@
       }
 
       .header-tabs {
+          order: 2;
           width: auto !important;
           justify-content: flex-start;
           gap: 10px !important;
