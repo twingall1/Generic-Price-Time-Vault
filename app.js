@@ -248,37 +248,7 @@ const manualAddStatus = document.getElementById("manualAddStatus");
 
 const locksContainer = document.getElementById("locksContainer");
 
-// ======================================================
-// SAFE GLOBAL VIEW SWITCHER (isolated from vault logic)
-// ======================================================
-window._pulseLocker_showUserGuide = function () {
-  const dash = document.getElementById("view-dashboard");
-  const guide = document.getElementById("view-userguide");
 
-  if (dash) dash.style.display = "none";
-  if (guide) guide.style.display = "block";
-
-  // Update tab visuals safely
-  const tabDash = document.getElementById("headerTabDashboard");
-  const tabGuide = document.getElementById("headerTabUserguide");
-
-  if (tabDash) tabDash.classList.remove("active-header-tab");
-  if (tabGuide) tabGuide.classList.add("active-header-tab");
-};
-
-window._pulseLocker_showDashboard = function () {
-  const dash = document.getElementById("view-dashboard");
-  const guide = document.getElementById("view-userguide");
-
-  if (dash) dash.style.display = "block";
-  if (guide) guide.style.display = "none";
-
-  const tabDash = document.getElementById("headerTabDashboard");
-  const tabGuide = document.getElementById("headerTabUserguide");
-
-  if (tabGuide) tabGuide.classList.remove("active-header-tab");
-  if (tabDash) tabDash.classList.add("active-header-tab");
-};
 
 // THEME TOGGLE (unchanged)
 (function initTheme() {
@@ -1995,16 +1965,4 @@ function formatCountdownNumber(diff) {
   if (!d && !h && !m) parts.push(s + "s");
   return parts.join(" ");
 }
-// ======================================================
-// ENABLE DIRECT LINKING TO USER GUIDE (SAFE MODE)
-// ======================================================
-window.addEventListener("DOMContentLoaded", () => {
-  const hash = window.location.hash.toLowerCase();
-  if (hash === "#userguide") {
-    // Call the safe global function defined earlier
-    if (window._pulseLocker_showUserGuide) {
-      window._pulseLocker_showUserGuide();
-    }
-  }
-});
 
