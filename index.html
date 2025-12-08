@@ -1017,10 +1017,10 @@
         </div>
       </div>
     </div>
+    
+    <a href="#dashboard" class="header-tab" id="tab-dashboard">Dashboard</a>
+    <a href="#userguide" class="header-tab" id="tab-guide">User Guide</a>
 
-    <div class="header-tabs">
-      <a href="#" class="header-tab" id="tab-dashboard" onclick="showDashboard(); return false;">Dashboard</a>
-      <a href="#" class="header-tab" id="tab-guide" onclick="showUserGuide(); return false;">User Guide</a>
     
       <!-- TELEGRAM BUTTON -->
       <a href="https://t.me/pulselocker" target="_blank" class="telegram-btn">
@@ -1330,33 +1330,42 @@
   <script src="app.js"></script>
 
   <script>
-    function showDashboard() {
-      const dash  = document.getElementById("view-dashboard");
-      const guide = document.getElementById("view-userguide");
-    
-      // Force dashboard visible, guide hidden (even against !important CSS)
-      dash.style.setProperty("display", "block", "important");
-      guide.style.setProperty("display", "none", "important");
-    
-      document.getElementById("tab-dashboard").classList.add("active-header-tab");
-      document.getElementById("tab-guide").classList.remove("active-header-tab");
-    }
-
-    function showUserGuide() {
-      const dash  = document.getElementById("view-dashboard");
-      const guide = document.getElementById("view-userguide");
-    
-      // Force dashboard hidden, guide visible (even against !important CSS)
+  /* ============================================================
+     SPA VIEW ROUTER (Dashboard <-> User Guide)
+     ============================================================ */
+  function routerApplyView(view) {
+    const dash  = document.getElementById("view-dashboard");
+    const guide = document.getElementById("view-userguide");
+  
+    if (view === "userguide") {
       dash.style.setProperty("display", "none", "important");
       guide.style.setProperty("display", "block", "important");
-    
       document.getElementById("tab-dashboard").classList.remove("active-header-tab");
       document.getElementById("tab-guide").classList.add("active-header-tab");
+    } else {
+      dash.style.setProperty("display", "block", "important");
+      guide.style.setProperty("display", "none", "important");
+      document.getElementById("tab-guide").classList.remove("active-header-tab");
+      document.getElementById("tab-dashboard").classList.add("active-header-tab");
     }
-
-    // Default view on load
-    showDashboard();
+  }
+  
+  /* ============================================================
+     Determine view from hash
+     ============================================================ */
+  function routerUpdateFromHash() {
+    const h = window.location.hash.toLowerCase();
+    if (h === "#userguide") routerApplyView("userguide");
+    else routerApplyView("dashboard");
+  }
+  
+  // Trigger router on load
+  window.addEventListener("DOMContentLoaded", routerUpdateFromHash);
+  
+  // Trigger router on back/forward navigation
+  window.addEventListener("hashchange", routerUpdateFromHash);
   </script>
+
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
