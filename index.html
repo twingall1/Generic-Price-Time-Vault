@@ -739,12 +739,23 @@
         padding-right: 8px !important;
       }
 
-      /* Stack header neatly */
+      /* Mobile: keep header left + tabs on the same line */
       .header-row {
         flex-direction: column;
         align-items: flex-start;
-        gap: 12px;
+        gap: 6px;
       }
+      
+      /* But header-left + header-tabs should be inline */
+      .header-left, 
+      .header-tabs {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 10px !important;
+        width: auto !important;
+      }
+
 
       .header-left {
         flex-direction: row;
