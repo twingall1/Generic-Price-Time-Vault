@@ -33,7 +33,10 @@ function computeDollarValue(balanceBN, priceBN, lockDecimals, quoteDecimals) {
     .mul(priceBN)
     .div(ethersLib.constants.WeiPerEther);
 
-  const displayDecimals = 18 + quoteDecimals - lockDecimals;
+  const displayDecimals =
+  lockDecimals === 8
+    ? lockDecimals
+    : 18 + quoteDecimals - lockDecimals;
   return Number(ethersLib.utils.formatUnits(usdBN, displayDecimals));
 }
 
